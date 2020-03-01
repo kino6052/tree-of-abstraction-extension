@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "webpack"
+    "build": "npm run clean && npm run build:prod && npm run build:extension",
+    "clean": "rm -rf ./dist",
+    "build:extension": "cp -r ./extension/* ./dist",
+    "build:prod": "webpack --config=webpack.production.js",
+    "build:dev": "webpack --config=webpack.development.js"
   },
   "keywords": [],
   "author": "",
@@ -12,6 +16,7 @@
   "devDependencies": {
     "@types/react": "^16.9.23",
     "@types/react-dom": "^16.9.5",
+    "@types/styled-components": "^5.0.1",
     "source-map-loader": "^0.2.4",
     "ts-loader": "^6.2.1",
     "typescript": "^3.8.3",
@@ -19,8 +24,8 @@
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "object-assign": "^4.1.1",
     "react": "^16.13.0",
-    "react-dom": "^16.13.0"
+    "react-dom": "^16.13.0",
+    "styled-components": "^5.0.1"
   }
 }

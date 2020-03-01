@@ -2,6 +2,8 @@ import { BehaviorSubject, Subject } from "rxjs";
 import { skip } from "rxjs/operators";
 import { useState, useEffect } from "react";
 
+export type Id = string;
+
 export const useSharedState = <T>(
   subject: BehaviorSubject<T>
 ): [T, typeof useState] => {
@@ -14,3 +16,9 @@ export const useSharedState = <T>(
   // @ts-ignore
   return [value, newSetState];
 };
+
+export const generateUniqueId = (): string => `\
+${Math.round(Math.random() * 10000)}-\
+${Math.round(Math.random() * 10000)}-\
+${Math.round(Math.random() * 10000)}-\
+${Math.round(Math.random() * 10000)}`;

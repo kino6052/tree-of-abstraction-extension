@@ -1,7 +1,11 @@
 import { BehaviorSubject } from "rxjs";
+import { generateUniqueId, Id } from "../utils";
+import { Item, IItem } from "./ItemService";
 
 export interface Tree {
   title: string;
+  id: Id;
+  hierarchy: IItem[];
 }
 
 export class TreeService {
@@ -25,5 +29,19 @@ export class TreeService {
     this.treeSubject.next(trees);
   };
 
+  addTree = (tree: Tree) => {
+    const old = this.treeSubject.getValue();
+    this.treeSubject.next([...old, tree]);
+  };
+
   getTrees = () => this.treeSubject.getValue();
+
+  createTree = (title: string) => {
+    const newTree: Tree = {
+      title,
+      id: generateUniqueId(),
+      hierarchy: []
+    };
+    this.addTree(newTree);
+  };
 }

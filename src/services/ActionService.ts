@@ -2,8 +2,14 @@ import { BehaviorSubject } from "rxjs";
 import { Subscriptions } from "./Subscriptions";
 
 export enum EAction {
-  ChangeLocation = "ChangeLocation"
+  ChangeLocation = "ChangeLocation",
+  Nothing = "Nothing",
+  CancelDialog = "CancelDialog",
+  SubmitDialog = "SubmitDialog",
+  OpenDialog = "OpenDialog"
 }
+
+export type TActionSubject = BehaviorSubject<Entry<keyof IActionParam>>;
 
 export interface IActionParam {
   // [EAction.Add]: { parentId: Id };
@@ -17,17 +23,25 @@ export interface IActionParam {
   // [EAction.AddNote]: {};
   // [EAction.RemoveNote]: { id: Id };
   // [EAction.AddLabel]: { id: Id };
+  [EAction.CancelDialog]: {};
+  [EAction.SubmitDialog]: {};
+  [EAction.OpenDialog]: {
+    title: string;
+    message: string;
+    content: React.ReactNode;
+  };
   [EAction.ChangeLocation]: { location: string };
+  [EAction.Nothing]: {};
 }
 
-export type Entry = { [K in EAction]?: IActionParam[K] };
+export type Entry<T extends keyof IActionParam> = [T, IActionParam[T]];
 
 export class ActionService {
-  actionSubject: BehaviorSubject<Entry>;
+  actionSubject: BehaviorSubject<Entry<keyof IActionParam>>;
   private static actionService: ActionService = (null as unknown) as ActionService;
 
   constructor() {
-    this.actionSubject = new BehaviorSubject({});
+    this.actionSubject = new BehaviorSubject([EAction.Nothing, {}]);
     Object.keys(Subscriptions).forEach(k => {
       Subscriptions[k as keyof typeof Subscriptions](this.actionSubject);
     });
@@ -39,7 +53,7 @@ export class ActionService {
     return ActionService.actionService;
   };
 
-  next = (entry: Entry) => {
-    this.actionSubject.next(entry);
+  next = (key: keyof IActionParam, props: IActionParam[typeof key]) => {
+    this.actionSubject.next([key, props]);
   };
 }

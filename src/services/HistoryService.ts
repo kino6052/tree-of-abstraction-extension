@@ -3,6 +3,11 @@ import { createMemoryHistory, MemoryHistory } from "history";
 
 const DEFAULT_PATH = "/";
 
+enum Path {
+  Default = "/",
+  Tree = "/tree"
+}
+
 export class HistoryService {
   historySubject: BehaviorSubject<string>;
   history: MemoryHistory;
@@ -22,6 +27,8 @@ export class HistoryService {
     HistoryService.historyService = new HistoryService();
     return HistoryService.historyService;
   };
+
+  generateTreeWithIdPath = (id: string) => `${Path.Tree}/${id}`;
 
   next = (location: string) => {
     this.historySubject.next(location);

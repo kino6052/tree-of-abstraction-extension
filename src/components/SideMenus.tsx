@@ -2,7 +2,7 @@ import * as React from "react";
 import Typography from "@material-ui/core/Typography";
 import Divider from "@material-ui/core/Divider";
 import { HierarchyList, HierarchyItem } from "./HierarchyItem";
-import { ActionService } from "../services/ActionService";
+import { ActionService, EAction } from "../services/ActionService";
 import ArrowBack from "@material-ui/icons/ArrowBack";
 import { Search } from "./Search";
 
@@ -19,9 +19,9 @@ export const MainMenu: React.SFC = () => {
         <HierarchyItem
           // @ts-ignore
           onClick={() =>
-            actionService.next({ ChangeLocation: { location: "/stuff" } })
+            actionService.next(EAction.ChangeLocation, { location: "/stuff" })
           }
-          text={"Personal Library"}
+          text={"Trees"}
           icon="test"
         />
       </HierarchyList>
@@ -36,7 +36,7 @@ export const TreeMenu: React.SFC = () => {
       <div className={"toolbar"}>
         <ArrowBack
           onClick={() =>
-            actionService.next({ ChangeLocation: { location: "/" } })
+            actionService.next(EAction.ChangeLocation, { location: "/" })
           }
         />
         <Typography>Personal Library</Typography>

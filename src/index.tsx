@@ -1,8 +1,8 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import { MyDrawer } from "./components/Drawer";
 import { init } from "./services";
+import { App } from "./App";
 
 init();
-ReactDOM.render(<MyDrawer />, document.getElementById("example"));
+ReactDOM.render(<App />, document.getElementById("example"));

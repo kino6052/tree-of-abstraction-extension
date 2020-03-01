@@ -9,14 +9,15 @@ import Add from "@material-ui/icons/Add";
 import * as React from "react";
 import { Route, Router, Switch } from "react-router-dom";
 import styled from "styled-components";
-import { ActionService } from "../services/ActionService";
+import { ActionService, EAction } from "../services/ActionService";
 import { HistoryService } from "../services/HistoryService";
 import { useSharedState } from "../utils";
 import { NoteItem } from "./NoteItem";
 import { MainMenu, TreeMenu } from "./SideMenus";
 import { TreeService } from "../services/TreeService";
+import { TreeItem } from "./TreeItem";
 
-const drawerWidth = 240;
+const drawerWidth = 400;
 
 const DrawerWrapper = styled.div`
   .root {
@@ -88,11 +89,18 @@ export const TestDrawer: React.SFC = () => {
 
 export const TreeList: React.SFC = () => {
   const treeService = TreeService.getService();
-  const trees = treeService.getTrees();
+  const actionService = ActionService.getService();
+  const [trees] = useSharedState(treeService.treeSubject);
   return (
     <React.Fragment>
       {trees.map(tree => (
-        <div>{tree.title}</div>
+        <TreeItem
+          tree={tree}
+          // @ts-ignore
+          onClick={() => {
+            actionService.next(EAction.ChangeLocation, { location: "/stuff" });
+          }}
+        />
       ))}
     </React.Fragment>
   );
@@ -117,6 +125,8 @@ export const Main: React.SFC = () => {
 };
 
 export const MyAppBar: React.SFC = () => {
+  const treeService = TreeService.getService();
+  const actionService = ActionService.getService();
   return (
     <AppBar position="fixed" className={"appBar"}>
       <Toolbar classes={{ root: "root" }}>
@@ -127,7 +137,13 @@ export const MyAppBar: React.SFC = () => {
           color="inherit"
           aria-label="open drawer"
           edge="end"
-          // onClick={handleDrawerOpen}
+          onClick={() =>
+            actionService.next(EAction.OpenDialog, {
+              title: "Add Tree",
+              message: "Please Add a New Tree",
+              content: () => <input value="Yay!" />
+            })
+          }
           // className={clsx(open && classes.hide)}
         >
           <Add />

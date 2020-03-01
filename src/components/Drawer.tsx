@@ -24,6 +24,7 @@ import { Router, Route } from "react-router-dom";
 import { Subject } from "rxjs";
 import { useSharedState } from "../utils";
 import { BehaviorSubject } from "rxjs";
+import { HistoryService } from "../services/HistoryService";
 
 const drawerWidth = 240;
 
@@ -73,18 +74,11 @@ const DrawerWrapper = styled.div`
   }
 `;
 
-const history = createMemoryHistory();
-
-const historySubject = new BehaviorSubject("/");
-
-historySubject.subscribe(location => {
-  history.push(location);
-});
-
 export const MyDrawer: React.SFC = () => {
-  const [] = useSharedState(historySubject);
+  const historyService = HistoryService.getHistoryService();
+  const [] = useSharedState(historyService.historySubject);
   return (
-    <Router history={history}>
+    <Router history={historyService.history}>
       <DrawerWrapper>
         <div className={"root"}>
           <CssBaseline />
@@ -121,10 +115,7 @@ export const MyDrawer: React.SFC = () => {
               <HierarchyList>
                 <HierarchyItem
                   // @ts-ignore
-                  onClick={() => {
-                    console.warn("here");
-                    history.push("/stuff");
-                  }}
+                  onClick={() => historyService.next("/stuff")}
                   text={"Personal Library"}
                   icon="test"
                 />
@@ -132,7 +123,7 @@ export const MyDrawer: React.SFC = () => {
             </Route>
             <Route path="/stuff">
               <div className={"toolbar"}>
-                <ArrowBack onClick={() => historySubject.next("/")} />
+                <ArrowBack onClick={() => historyService.next("/")} />
                 <Typography>Personal Library</Typography>
               </div>
               <Divider />

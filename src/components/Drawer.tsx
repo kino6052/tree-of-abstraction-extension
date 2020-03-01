@@ -1,30 +1,20 @@
 // import React from "react";
-import styled from "styled-components";
-
-import { HierarchyList, HierarchyItem } from "./HierarchyItem";
-import { ArrowBack, Add } from "@material-ui/icons";
-import * as React from "react";
-import { Search } from "./Search";
 import { IconButton } from "@material-ui/core";
-import Drawer from "@material-ui/core/Drawer";
-import CssBaseline from "@material-ui/core/CssBaseline";
 import AppBar from "@material-ui/core/AppBar";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import Drawer from "@material-ui/core/Drawer";
 import Toolbar from "@material-ui/core/Toolbar";
-import List from "@material-ui/core/List";
 import Typography from "@material-ui/core/Typography";
-import Divider from "@material-ui/core/Divider";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
-import MailIcon from "@material-ui/icons/Mail";
-import { NoteItem } from "./NoteItem";
-import { createMemoryHistory, createBrowserHistory } from "history";
-import { Router, Route } from "react-router-dom";
-import { Subject } from "rxjs";
-import { useSharedState } from "../utils";
-import { BehaviorSubject } from "rxjs";
+import Add from "@material-ui/icons/Add";
+import * as React from "react";
+import { Route, Router, Switch } from "react-router-dom";
+import styled from "styled-components";
+import { ActionService } from "../services/ActionService";
 import { HistoryService } from "../services/HistoryService";
+import { useSharedState } from "../utils";
+import { NoteItem } from "./NoteItem";
+import { MainMenu, TreeMenu } from "./SideMenus";
+import { TreeService } from "../services/TreeService";
 
 const drawerWidth = 240;
 
@@ -74,77 +64,92 @@ const DrawerWrapper = styled.div`
   }
 `;
 
+export const TestDrawer: React.SFC = () => {
+  return (
+    <Drawer
+      className={"drawer"}
+      variant="permanent"
+      classes={{
+        paper: "drawer"
+      }}
+      anchor="left"
+    >
+      <Switch>
+        <Route exact path="/">
+          <MainMenu />
+        </Route>
+        <Route path="/stuff">
+          <TreeMenu />
+        </Route>
+      </Switch>
+    </Drawer>
+  );
+};
+
+export const TreeList: React.SFC = () => {
+  const treeService = TreeService.getService();
+  const trees = treeService.getTrees();
+  return (
+    <React.Fragment>
+      {trees.map(tree => (
+        <div>{tree.title}</div>
+      ))}
+    </React.Fragment>
+  );
+};
+
+export const Main: React.SFC = () => {
+  return (
+    <main className={"content"}>
+      <div className={"toolbar"} />
+      <Switch>
+        <Route exact path="/">
+          <TreeList />
+        </Route>
+        <Route path="/stuff">
+          <NoteItem />
+          <NoteItem />
+          <NoteItem />
+        </Route>
+      </Switch>
+    </main>
+  );
+};
+
+export const MyAppBar: React.SFC = () => {
+  return (
+    <AppBar position="fixed" className={"appBar"}>
+      <Toolbar classes={{ root: "root" }}>
+        <Typography variant="h6" noWrap>
+          Root
+        </Typography>
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          edge="end"
+          // onClick={handleDrawerOpen}
+          // className={clsx(open && classes.hide)}
+        >
+          <Add />
+        </IconButton>
+      </Toolbar>
+    </AppBar>
+  );
+};
+
 export const MyDrawer: React.SFC = () => {
-  const historyService = HistoryService.getHistoryService();
+  const historyService = HistoryService.getService();
+  const actionService = ActionService.getService();
   const [] = useSharedState(historyService.historySubject);
   return (
     <Router history={historyService.history}>
       <DrawerWrapper>
         <div className={"root"}>
           <CssBaseline />
-          <AppBar position="fixed" className={"appBar"}>
-            <Toolbar classes={{ root: "root" }}>
-              <Typography variant="h6" noWrap>
-                Root
-              </Typography>
-              <IconButton
-                color="inherit"
-                aria-label="open drawer"
-                edge="end"
-                // onClick={handleDrawerOpen}
-                // className={clsx(open && classes.hide)}
-              >
-                <Add />
-              </IconButton>
-            </Toolbar>
-          </AppBar>
-          <Drawer
-            className={"drawer"}
-            variant="permanent"
-            classes={{
-              paper: "drawer"
-            }}
-            anchor="left"
-          >
-            <Route exact path="/">
-              <div className={"toolbar"}>
-                {/* <ArrowBack /> */}
-                <Typography>Toolset</Typography>
-              </div>
-              <Divider />
-              <HierarchyList>
-                <HierarchyItem
-                  // @ts-ignore
-                  onClick={() => historyService.next("/stuff")}
-                  text={"Personal Library"}
-                  icon="test"
-                />
-              </HierarchyList>
-            </Route>
-            <Route path="/stuff">
-              <div className={"toolbar"}>
-                <ArrowBack onClick={() => historyService.next("/")} />
-                <Typography>Personal Library</Typography>
-              </div>
-              <Divider />
-              <Search />
-              <HierarchyList>
-                {[1, 2, 3].map(i => (
-                  <HierarchyItem text={`${i}`} indentation={i} />
-                ))}
-              </HierarchyList>
-            </Route>
-          </Drawer>
-          <main className={"content"}>
-            <Route path="/stuff">
-              <div className={"toolbar"} />
-              <NoteItem />
-              <NoteItem />
-              <NoteItem />
-            </Route>
-          </main>
+          <MyAppBar />
+          <TestDrawer />
+          <Main />
         </div>
-        ); }
       </DrawerWrapper>
     </Router>
   );

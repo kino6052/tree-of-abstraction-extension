@@ -1,6 +1,8 @@
 import * as React from "react";
 import styled, { css } from "styled-components";
-import { Book, ExpandMore, Remove } from "@material-ui/icons";
+import Book from "@material-ui/icons/Book";
+import ExpandMore from "@material-ui/icons/ExpandMore";
+import Remove from "@material-ui/icons/Remove";
 import {
   ListItem,
   ListItemIcon,
@@ -27,7 +29,7 @@ export const HierarchyItem: React.SFC<{
   collapsed?: boolean;
   isEditing?: boolean;
   onChange?: (e: React.ChangeEvent) => void;
-}> = (props) => {
+}> = props => {
   const {
     text = "",
     indentation = 0,
@@ -70,7 +72,9 @@ export const HierarchyItem: React.SFC<{
   );
 };
 
-export const HierarchyList: React.SFC<{ children: React.ReactNode }> = (props) => {
+export const HierarchyList: React.SFC<{
+  children: React.ReactNode;
+}> = props => {
   const { children } = props;
   return <List>{children}</List>;
 };

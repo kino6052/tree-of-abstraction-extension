@@ -1,6 +1,6 @@
 import * as React from "react";
 import styled from "styled-components";
-import { MoreVert } from "@material-ui/icons";
+import MoreVert from "@material-ui/icons/MoreVert";
 import { BehaviorSubject } from "rxjs";
 import { Menu, MenuItem, Typography, IconButton } from "@material-ui/core";
 import { useState } from "react";
@@ -36,9 +36,12 @@ export enum EMenuAction {
 export const CurrentMenuStateSubject = new BehaviorSubject<{
   id: string;
   action: EMenuAction;
-}>({ id: '1', action: EMenuAction.Remove });
+}>({ id: "1", action: EMenuAction.Remove });
 
-export const MenuComponent: React.SFC<{ id: string, options: Options }> = (props) => {
+export const MenuComponent: React.SFC<{
+  id: string;
+  options: Options;
+}> = props => {
   const { options = [], id = "" } = props;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 

@@ -17,7 +17,7 @@ export class HistoryService {
     });
   }
 
-  static getHistoryService = () => {
+  static getService = () => {
     if (HistoryService.historyService) return HistoryService.historyService;
     HistoryService.historyService = new HistoryService();
     return HistoryService.historyService;

@@ -21,7 +21,7 @@ const handleClose = (setAnchorEl: (el: HTMLElement | null) => void) => {
 };
 
 interface Option {
-  onClick: (e: InputEvent) => void;
+  onClick: (e: React.MouseEvent) => void;
   text: string;
 }
 
@@ -33,16 +33,10 @@ export enum EMenuAction {
   Edit = "Edit"
 }
 
-export const CurrentMenuStateSubject = new BehaviorSubject<{
-  id: string;
-  action: EMenuAction;
-}>({ id: "1", action: EMenuAction.Remove });
-
 export const MenuComponent: React.SFC<{
-  id: string;
   options: Options;
 }> = props => {
-  const { options = [], id = "" } = props;
+  const { options = [] } = props;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   return (
@@ -69,7 +63,7 @@ export const MenuComponent: React.SFC<{
         onClose={() => handleClose(setAnchorEl)}
       >
         <MenuItem key="placeholder" style={{ display: "none" }} />
-        {options.map(option => {
+        {options.map(({ text, onClick }) => {
           // const MenuIcon = mapMenuItemToIcon(option.text);
           return (
             <MenuItem
@@ -79,11 +73,9 @@ export const MenuComponent: React.SFC<{
                 padding: "12px"
               }}
               // key={option}
-              onClick={e => {
-                // CurrentMenuStateSubject.next({ id, option });
-              }}
+              onClick={onClick}
             >
-              <Typography style={{ width: "160px" }}>{option}</Typography>
+              <Typography style={{ width: "160px" }}>{text}</Typography>
             </MenuItem>
           );
         })}

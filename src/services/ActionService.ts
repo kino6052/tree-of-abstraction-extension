@@ -1,6 +1,7 @@
 import { BehaviorSubject } from "rxjs";
 import { Subscriptions } from "./Subscriptions";
 import { Tree } from "./TreeService";
+import { Id } from "../utils";
 
 export enum EAction {
   CreateNewTree = "CreateNewTree",
@@ -9,23 +10,15 @@ export enum EAction {
   CloseDialog = "CloseDialog",
   SubmitDialog = "SubmitDialog",
   OpenDialog = "OpenDialog",
-  GoToTree = "GoToTree"
+  GoToTree = "GoToTree",
+  EditItem = "EditItem",
+  RemoveItem = "RemoveItem",
+  AddChild = "AddChild"
 }
 
 export type TActionSubject = BehaviorSubject<Entry<keyof IActionParam>>;
 
 export interface IActionParam {
-  // [EAction.Add]: { parentId: Id };
-  // [EAction.Remove]: { id: Id };
-  // [EAction.Update]: Partial<IExtendedItem>;
-  // [EAction.Collapse]: { id: Id };
-  // [EAction.Select]: { id: Id; add: boolean };
-  // [EAction.SetTitle]: { id: Id; title: string };
-  // [EAction.Search]: {};
-  // [EAction.NoteSearch]: {};
-  // [EAction.AddNote]: {};
-  // [EAction.RemoveNote]: { id: Id };
-  // [EAction.AddLabel]: { id: Id };
   [EAction.CreateNewTree]: { title: string };
   [EAction.CloseDialog]: {};
   [EAction.SubmitDialog]: {};
@@ -35,6 +28,9 @@ export interface IActionParam {
   [EAction.ChangeLocation]: { location: string };
   [EAction.Nothing]: {};
   [EAction.GoToTree]: { tree: Tree };
+  [EAction.AddChild]: { id: Id };
+  [EAction.EditItem]: { id: Id };
+  [EAction.RemoveItem]: { id: Id };
 }
 
 export type Entry<T extends keyof IActionParam> = [T, IActionParam[T]];

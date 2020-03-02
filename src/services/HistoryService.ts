@@ -18,7 +18,7 @@ export class HistoryService {
     this.historySubject = new BehaviorSubject(DEFAULT_PATH);
     this.historySubject.subscribe(location => {
       this.history.push(location);
-      console.warn(location, this.history, this.history.location.pathname);
+      // console.warn(location, this.history, this.history.location.pathname);
     });
   }
 
@@ -26,6 +26,16 @@ export class HistoryService {
     if (HistoryService.historyService) return HistoryService.historyService;
     HistoryService.historyService = new HistoryService();
     return HistoryService.historyService;
+  };
+
+  isTreePath = () => {
+    const path = this.historySubject.getValue();
+    return path === EPath.Tree;
+  };
+
+  isDefaultPath = () => {
+    const path = this.historySubject.getValue();
+    return path === EPath.Default;
   };
 
   generateTreeWithIdPath = (id: string) => `${EPath.Tree}/${id}`;

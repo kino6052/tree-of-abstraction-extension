@@ -1,0 +1,22 @@
+{
+  "manifest_version": 2,
+  "name": "Tree of Abstraction",
+  "short_name": "tree-of-abstraction",
+  "version": "1.0.0",
+  "description": "...",
+  "background": {
+    "scripts": ["./background.js"]
+  },
+  "browser_action": {},
+  "icons": {},
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "webRequest",
+    "webRequestBlocking",
+    "storage",
+    "contextMenus",
+    "<all_urls>"
+  ],
+  "content_security_policy": "script-src 'self' http://localhost:3000 'unsafe-eval'; object-src 'self'"
+}

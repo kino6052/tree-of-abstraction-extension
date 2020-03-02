@@ -18,7 +18,7 @@ export interface IExtendedItem extends IItem {
 
 export class ItemService {
   private static itemService: ItemService = (null as unknown) as ItemService;
-  removeSubject: Subject<{ id: string }>;
+  removeSubject: Subject<{ id?: string }>;
   itemSubject: Subject<{
     id: string;
     cb: (item: IExtendedItem) => void;
@@ -37,7 +37,7 @@ export class ItemService {
       id: Id;
       cb: (item: IExtendedItem) => void;
     }>();
-    this.removeSubject = new Subject<{ id: Id }>();
+    this.removeSubject = new Subject<{ id?: Id }>();
 
     this.parentSubject = new Subject<{
       id: Id;
@@ -56,6 +56,16 @@ export class ItemService {
     ItemService.itemService = new ItemService();
     return ItemService.itemService;
   };
+
+  reset = () => {
+    this.removeSubject.next({});
+  };
+
+  getItemObjectsFromHierarchy = (hierarchy: HierarchyType[]): IItem[] =>
+    hierarchy.map(([i]) => {
+      const { id, title, children, parentId } = i;
+      return { id, title, children, parentId };
+    });
 
   getItem = (id: Id, cb: (item: IExtendedItem) => void) => {
     this.itemSubject.next({ id, cb });
@@ -93,8 +103,8 @@ export class ItemService {
   };
 
   remove = (id: Id) => {
-    // const root = this.root;
-    // if (id === root.id) return;
+    const root = this.getRoot();
+    if (root && id === root.id) return;
     this.removeSubject.next({ id });
   };
 
@@ -110,6 +120,12 @@ export class ItemService {
         cb(item);
       }
     });
+  };
+
+  getRoot = () => {
+    const hierarchy = this.hierarchyStateSubject.getValue();
+    if (hierarchy && hierarchy[0]) return hierarchy[0][0];
+    return;
   };
 
   getIndentation = (item: IExtendedItem, cb: (indentation: number) => void) => {
@@ -152,7 +168,8 @@ export class ItemService {
     cb(result);
   };
 
-  updateHierarchy = (root: IExtendedItem) =>
+  updateHierarchy = (root: IExtendedItem) => {
+    if (!root) return;
     this.getHierarchy(
       root,
       hierarchy => {
@@ -164,6 +181,8 @@ export class ItemService {
         item.visible = search(item, query);
       }
     );
+  };
+
   collapseAll = (id: Id, cb: () => void) => {
     this.getItem(id, item => {
       this.getHierarchy(item, cb, item => {
@@ -239,7 +258,7 @@ export class Item implements IExtendedItem {
       }
     });
   };
-  constructor(title: string, id: Id = generateUniqueId(), parentId?: Id) {
+  constructor(title: string, id: Id, parentId?: Id) {
     const { removeSubject, itemSubject } = ItemService.getService();
     this.id = id;
     this.title = title;
@@ -251,12 +270,13 @@ export class Item implements IExtendedItem {
       )
       .subscribe(({ cb }) => cb(this));
     removeSubject.pipe(takeWhile(() => !this.done)).subscribe(({ id }) => {
+      if (!id) this.done = true; // Remove All
       this.children = this.children.filter(c => c !== id);
       if (id === this.id) this.done = true;
     });
     if (parentId) {
       this.parentId = parentId;
-      this.addChild.call(this, parentId);
+      this.addChild(parentId);
     }
   }
 }

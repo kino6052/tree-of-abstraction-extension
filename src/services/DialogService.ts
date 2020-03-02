@@ -16,7 +16,7 @@ export class DialogService {
   constructor() {
     this.dialogSubject = new BehaviorSubject(DEFAULT_DIALOG_STATE);
     this.dialogSubject.subscribe(location => {
-      console.warn(location);
+      // console.warn(location);
     });
   }
 

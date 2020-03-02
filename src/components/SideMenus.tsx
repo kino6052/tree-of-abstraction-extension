@@ -1,7 +1,11 @@
 import * as React from "react";
 import Typography from "@material-ui/core/Typography";
 import Divider from "@material-ui/core/Divider";
-import { HierarchyList, HierarchyItem } from "./HierarchyItem";
+import {
+  HierarchyList,
+  HierarchyItem,
+  MainMenuHierarchyItem
+} from "./HierarchyItem";
 import { ActionService, EAction } from "../services/ActionService";
 import ArrowBack from "@material-ui/icons/ArrowBack";
 import { Search } from "./Search";
@@ -18,13 +22,7 @@ export const MainMenu: React.SFC = () => {
       </div>
       <Divider />
       <HierarchyList>
-        <HierarchyItem
-          // @ts-ignore
-          // onClick={() =>
-          //   // actionService.next(EAction.ChangeLocation, { location: "/stuff" })
-          // }
-          text={"Trees"}
-        />
+        <MainMenuHierarchyItem title={"Trees"} />
       </HierarchyList>
     </React.Fragment>
   );
@@ -48,7 +46,7 @@ export const TreeMenu: React.SFC = () => {
       <Search />
       <HierarchyList>
         {hierarchy.map(([item, indentation]) => (
-          <HierarchyItem text={`${item.title}`} indentation={indentation} />
+          <HierarchyItem item={item} indentation={indentation} />
         ))}
       </HierarchyList>
     </React.Fragment>

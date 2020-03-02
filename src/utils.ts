@@ -17,6 +17,20 @@ export const useSharedState = <T>(
   return [value, newSetState];
 };
 
+export enum EPersistenceMessage {
+  SaveTree = "SaveTree",
+  LoadTrees = "LoadTrees",
+  TreesLoaded = "TreesLoaded"
+}
+
+export const sendMessage = <T>(message: EPersistenceMessage, data: T) => {
+  document.dispatchEvent(
+    new CustomEvent(message, {
+      detail: data
+    })
+  );
+};
+
 export const generateUniqueId = (): string => `\
 ${Math.round(Math.random() * 10000)}-\
 ${Math.round(Math.random() * 10000)}-\

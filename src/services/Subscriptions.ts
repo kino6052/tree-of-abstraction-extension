@@ -5,6 +5,7 @@ import { HistoryService, EPath } from "./HistoryService";
 import { DialogService } from "./DialogService";
 import { TreeService } from "./TreeService";
 import { ItemService, Item } from "./ItemService";
+import { generateUniqueId } from "../utils";
 
 const subscribe = <T extends keyof IActionParam>(
   subject: BehaviorSubject<Entry<keyof IActionParam>>,
@@ -15,23 +16,26 @@ const subscribe = <T extends keyof IActionParam>(
 };
 
 export const Subscriptions = {
+  onAddChild: (subject: TActionSubject) => {
+    subscribe(subject, EAction.AddChild, ([_, { id }]) => {
+      const itemService = ItemService.getService();
+      new Item("Untitled", generateUniqueId(), id);
+      const root = itemService.getRoot();
+      if (root) itemService.updateHierarchy(root);
+    });
+  },
   onGoToTree: (subject: TActionSubject) => {
     subscribe(subject, EAction.GoToTree, ([_, { tree }]) => {
       const treeService = TreeService.getService();
       const historyService = HistoryService.getService();
       const itemService = ItemService.getService();
-      const root = tree.hierarchy.map(
-        ({ id, parentId, title }) => new Item(title, id, parentId)
-      )[0];
-      itemService.getHierarchy(
-        root,
-        () => {
-          itemService.updateHierarchy(root);
-          treeService.setActiveTree(tree);
-          historyService.next(EPath.Tree);
-        },
-        console.warn
-      );
+      itemService.reset();
+      treeService.setActiveTree(tree);
+      const root = treeService.generateTree(tree);
+      itemService.getHierarchy(root, result => {
+        itemService.hierarchyStateSubject.next(result);
+        historyService.next(EPath.Tree);
+      });
     });
   },
   onCreateNewTree: (subject: TActionSubject) => {
@@ -46,7 +50,7 @@ export const Subscriptions = {
   },
   onOpenDialog: (subject: TActionSubject) => {
     subscribe(subject, EAction.OpenDialog, ([_, { content }]) => {
-      console.warn("open");
+      // console.warn("open");
       DialogService.getService().openDialog(content);
       // TODO: Implement
     });

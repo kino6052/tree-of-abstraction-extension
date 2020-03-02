@@ -11,6 +11,8 @@ import {
   Input
 } from "@material-ui/core";
 import { MenuComponent } from "./Menu";
+import { ActionService, EAction } from "../services/ActionService";
+import { IExtendedItem } from "../services/ItemService";
 
 const HierarchyItemWrapper = styled.div<{ indentation: number }>`
   margin-left: ${({ indentation }) => indentation * 16}px;
@@ -23,21 +25,22 @@ const HierarchyItemWrapper = styled.div<{ indentation: number }>`
   }
 `;
 
-export const HierarchyItem: React.SFC<{
-  text: string;
+export const MainMenuHierarchyItem: React.SFC<{
+  title: string;
   indentation?: number;
   collapsed?: boolean;
   isEditing?: boolean;
   onChange?: (e: React.ChangeEvent) => void;
 }> = props => {
   const {
-    text = "",
+    title,
     indentation = 0,
     collapsed = false,
     isEditing = false,
     onChange,
     ...rest
   } = props;
+  const actionService = ActionService.getService();
   return (
     <HierarchyItemWrapper {...rest} indentation={indentation}>
       <ListItem>
@@ -52,21 +55,95 @@ export const HierarchyItem: React.SFC<{
         </ListItemIcon>
         {!isEditing && (
           <ListItemText
-            primary={text}
+            primary={title}
             // secondary={secondary ? "Secondary text" : null}
           />
         )}
         {isEditing && (
           <Input
-            value={text}
+            value={title}
+            onChange={onChange}
+            // secondary={secondary ? "Secondary text" : null}
+          />
+        )}
+      </ListItem>
+      {/* <MenuComponent
+        options={[
+          {
+            text: "Edit",
+            onClick: () => actionService.next(EAction.EditItem, { id })
+          },
+          {
+            text: "Add Child",
+            onClick: () => actionService.next(EAction.AddChild, { id })
+          },
+          {
+            text: "Remove",
+            onClick: () => actionService.next(EAction.RemoveItem, { id })
+          }
+        ]}
+      /> */}
+    </HierarchyItemWrapper>
+  );
+};
+
+export const HierarchyItem: React.SFC<{
+  item: IExtendedItem;
+  indentation?: number;
+  collapsed?: boolean;
+  isEditing?: boolean;
+  onChange?: (e: React.ChangeEvent) => void;
+}> = props => {
+  const {
+    item: { id, title },
+    indentation = 0,
+    collapsed = false,
+    isEditing = false,
+    onChange,
+    ...rest
+  } = props;
+  const actionService = ActionService.getService();
+  return (
+    <HierarchyItemWrapper {...rest} indentation={indentation}>
+      <ListItem>
+        <ListItemIcon className="icon">
+          <React.Fragment>
+            {collapsed && <ExpandMore />}
+            {!collapsed && <Remove />}
+          </React.Fragment>
+        </ListItemIcon>
+        <ListItemIcon className="icon">
+          <Book />
+        </ListItemIcon>
+        {!isEditing && (
+          <ListItemText
+            primary={title}
+            // secondary={secondary ? "Secondary text" : null}
+          />
+        )}
+        {isEditing && (
+          <Input
+            value={title}
             onChange={onChange}
             // secondary={secondary ? "Secondary text" : null}
           />
         )}
       </ListItem>
       <MenuComponent
-        // @ts-ignore
-        options={[{ text: "Edit" }, { text: "Add Child" }, { text: "Remove" }]}
+        options={[
+          {
+            text: "Edit",
+            onClick: () => actionService.next(EAction.EditItem, { id })
+          },
+          {
+            text: "Add Child",
+            onClick: () => actionService.next(EAction.AddChild, { id })
+          },
+          {
+            text: "Remove",
+            onClick: () => actionService.next(EAction.RemoveItem, { id })
+          }
+        ]}
       />
     </HierarchyItemWrapper>
   );

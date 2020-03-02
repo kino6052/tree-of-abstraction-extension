@@ -1,14 +1,13 @@
-import * as React from "react";
 import {
-  TextField,
-  DialogTitle,
-  DialogContent,
   Box,
-  DialogContentText,
   Button,
   DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Input
 } from "@material-ui/core";
+import * as React from "react";
 import { ActionService, EAction } from "../services/ActionService";
 
 const unboxEvent = (

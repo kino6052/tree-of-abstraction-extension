@@ -1,12 +1,12 @@
 import * as React from "react";
 import { AlertDialog } from "./components/Dialog";
-import { MyDrawer } from "./components/Drawer";
+import { Dashboard } from "./components/Dashboard";
 
 export const App: React.SFC = () => {
   return (
     <React.Fragment>
       <AlertDialog />
-      <MyDrawer />
+      <Dashboard />
     </React.Fragment>
   );
 };

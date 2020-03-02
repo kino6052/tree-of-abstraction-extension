@@ -1,4 +1,6 @@
 // import React from "react";
+import * as React from "react";
+import { Route, Router, Switch } from "react-router-dom";
 import { IconButton } from "@material-ui/core";
 import AppBar from "@material-ui/core/AppBar";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -6,8 +8,6 @@ import Drawer from "@material-ui/core/Drawer";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import Add from "@material-ui/icons/Add";
-import * as React from "react";
-import { Route, Router, Switch } from "react-router-dom";
 import styled from "styled-components";
 import { ActionService, EAction } from "../services/ActionService";
 import { HistoryService } from "../services/HistoryService";
@@ -16,6 +16,8 @@ import { NoteItem } from "./NoteItem";
 import { MainMenu, TreeMenu } from "./SideMenus";
 import { TreeService } from "../services/TreeService";
 import { TreeItem } from "./TreeItem";
+import { CreateNewTreeDialog } from "./DialogInputs";
+import { generate } from "rxjs";
 
 const drawerWidth = 400;
 
@@ -65,7 +67,7 @@ const DrawerWrapper = styled.div`
   }
 `;
 
-export const TestDrawer: React.SFC = () => {
+export const AppDrawer: React.SFC = () => {
   return (
     <Drawer
       className={"drawer"}
@@ -79,7 +81,7 @@ export const TestDrawer: React.SFC = () => {
         <Route exact path="/">
           <MainMenu />
         </Route>
-        <Route path="/stuff">
+        <Route path="/tree">
           <TreeMenu />
         </Route>
       </Switch>
@@ -98,7 +100,7 @@ export const TreeList: React.SFC = () => {
           tree={tree}
           // @ts-ignore
           onClick={() => {
-            actionService.next(EAction.ChangeLocation, { location: "/stuff" });
+            actionService.next(EAction.GoToTree, { tree });
           }}
         />
       ))}
@@ -114,7 +116,7 @@ export const Main: React.SFC = () => {
         <Route exact path="/">
           <TreeList />
         </Route>
-        <Route path="/stuff">
+        <Route path="/tree">
           <NoteItem />
           <NoteItem />
           <NoteItem />
@@ -124,8 +126,7 @@ export const Main: React.SFC = () => {
   );
 };
 
-export const MyAppBar: React.SFC = () => {
-  const treeService = TreeService.getService();
+export const Header: React.SFC = () => {
   const actionService = ActionService.getService();
   return (
     <AppBar position="fixed" className={"appBar"}>
@@ -139,9 +140,7 @@ export const MyAppBar: React.SFC = () => {
           edge="end"
           onClick={() =>
             actionService.next(EAction.OpenDialog, {
-              title: "Add Tree",
-              message: "Please Add a New Tree",
-              content: () => <input value="Yay!" />
+              content: <CreateNewTreeDialog />
             })
           }
           // className={clsx(open && classes.hide)}
@@ -155,15 +154,14 @@ export const MyAppBar: React.SFC = () => {
 
 export const MyDrawer: React.SFC = () => {
   const historyService = HistoryService.getService();
-  const actionService = ActionService.getService();
   const [] = useSharedState(historyService.historySubject);
   return (
     <Router history={historyService.history}>
       <DrawerWrapper>
         <div className={"root"}>
           <CssBaseline />
-          <MyAppBar />
-          <TestDrawer />
+          <Header />
+          <AppDrawer />
           <Main />
         </div>
       </DrawerWrapper>

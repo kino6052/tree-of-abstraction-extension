@@ -3,7 +3,7 @@ import { createMemoryHistory, MemoryHistory } from "history";
 
 const DEFAULT_PATH = "/";
 
-enum Path {
+export enum EPath {
   Default = "/",
   Tree = "/tree"
 }
@@ -18,7 +18,7 @@ export class HistoryService {
     this.historySubject = new BehaviorSubject(DEFAULT_PATH);
     this.historySubject.subscribe(location => {
       this.history.push(location);
-      console.warn(location);
+      console.warn(location, this.history, this.history.location.pathname);
     });
   }
 
@@ -28,7 +28,7 @@ export class HistoryService {
     return HistoryService.historyService;
   };
 
-  generateTreeWithIdPath = (id: string) => `${Path.Tree}/${id}`;
+  generateTreeWithIdPath = (id: string) => `${EPath.Tree}/${id}`;
 
   next = (location: string) => {
     this.historySubject.next(location);

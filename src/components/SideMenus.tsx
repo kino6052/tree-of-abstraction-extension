@@ -5,6 +5,8 @@ import { HierarchyList, HierarchyItem } from "./HierarchyItem";
 import { ActionService, EAction } from "../services/ActionService";
 import ArrowBack from "@material-ui/icons/ArrowBack";
 import { Search } from "./Search";
+import { ItemService } from "../services/ItemService";
+import { useSharedState } from "../utils";
 
 export const MainMenu: React.SFC = () => {
   const actionService = ActionService.getService();
@@ -18,11 +20,10 @@ export const MainMenu: React.SFC = () => {
       <HierarchyList>
         <HierarchyItem
           // @ts-ignore
-          onClick={() =>
-            actionService.next(EAction.ChangeLocation, { location: "/stuff" })
-          }
+          // onClick={() =>
+          //   // actionService.next(EAction.ChangeLocation, { location: "/stuff" })
+          // }
           text={"Trees"}
-          icon="test"
         />
       </HierarchyList>
     </React.Fragment>
@@ -31,6 +32,8 @@ export const MainMenu: React.SFC = () => {
 
 export const TreeMenu: React.SFC = () => {
   const actionService = ActionService.getService();
+  const { hierarchyStateSubject } = ItemService.getService();
+  const [hierarchy] = useSharedState(hierarchyStateSubject);
   return (
     <React.Fragment>
       <div className={"toolbar"}>
@@ -44,8 +47,8 @@ export const TreeMenu: React.SFC = () => {
       <Divider />
       <Search />
       <HierarchyList>
-        {[1, 2, 3].map(i => (
-          <HierarchyItem text={`${i}`} indentation={i} />
+        {hierarchy.map(([item, indentation]) => (
+          <HierarchyItem text={`${item.title}`} indentation={indentation} />
         ))}
       </HierarchyList>
     </React.Fragment>

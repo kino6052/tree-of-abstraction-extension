@@ -1,8 +1,10 @@
 import { BehaviorSubject } from "rxjs";
 import { Entry, EAction, IActionParam, TActionSubject } from "./ActionService";
 import { filter } from "rxjs/internal/operators/filter";
-import { HistoryService } from "./HistoryService";
+import { HistoryService, EPath } from "./HistoryService";
 import { DialogService } from "./DialogService";
+import { TreeService } from "./TreeService";
+import { ItemService, Item } from "./ItemService";
 
 const subscribe = <T extends keyof IActionParam>(
   subject: BehaviorSubject<Entry<keyof IActionParam>>,
@@ -13,31 +15,46 @@ const subscribe = <T extends keyof IActionParam>(
 };
 
 export const Subscriptions = {
+  onGoToTree: (subject: TActionSubject) => {
+    subscribe(subject, EAction.GoToTree, ([_, { tree }]) => {
+      const treeService = TreeService.getService();
+      const historyService = HistoryService.getService();
+      const itemService = ItemService.getService();
+      const root = tree.hierarchy.map(
+        ({ id, parentId, title }) => new Item(title, id, parentId)
+      )[0];
+      itemService.getHierarchy(
+        root,
+        () => {
+          itemService.updateHierarchy(root);
+          treeService.setActiveTree(tree);
+          historyService.next(EPath.Tree);
+        },
+        console.warn
+      );
+    });
+  },
+  onCreateNewTree: (subject: TActionSubject) => {
+    subscribe(subject, EAction.CreateNewTree, ([_, { title }]) => {
+      TreeService.getService().createTree(title);
+    });
+  },
   onHistoryChange: (subject: TActionSubject) => {
     subscribe(subject, EAction.ChangeLocation, ([_, { location }]) => {
       HistoryService.getService().next(location);
     });
   },
   onOpenDialog: (subject: TActionSubject) => {
-    subscribe(
-      subject,
-      EAction.OpenDialog,
-      ([_, { title, message, content }]) => {
-        console.warn("open");
-        DialogService.getService().openDialog(title, message, content);
-        // TODO: Implement
-      }
-    );
-  },
-  onSubmitDialog: (subject: TActionSubject) => {
-    subscribe(subject, EAction.SubmitDialog, ([_, {}]) => {
-      console.warn("submit");
+    subscribe(subject, EAction.OpenDialog, ([_, { content }]) => {
+      console.warn("open");
+      DialogService.getService().openDialog(content);
       // TODO: Implement
     });
   },
-  onCancelDialog: (subject: TActionSubject) => {
-    subscribe(subject, EAction.CancelDialog, ([_, {}]) => {
-      console.warn("cancel");
+  onCloseDialog: (subject: TActionSubject) => {
+    subscribe(subject, EAction.CloseDialog, ([_, {}]) => {
+      // console.warn("cancel");
+      DialogService.getService().closeDialog();
       // TODO: Implement
     });
   }

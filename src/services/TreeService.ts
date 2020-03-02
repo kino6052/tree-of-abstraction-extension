@@ -10,6 +10,8 @@ export interface Tree {
 
 export class TreeService {
   treeSubject: BehaviorSubject<Tree[]>;
+  activeTree: Tree;
+
   private static treeService: TreeService = (null as unknown) as TreeService;
 
   constructor() {
@@ -36,11 +38,15 @@ export class TreeService {
 
   getTrees = () => this.treeSubject.getValue();
 
+  setActiveTree = (tree: Tree) => (this.activeTree = tree);
+
+  getActiveTree = () => this.activeTree;
+
   createTree = (title: string) => {
     const newTree: Tree = {
       title,
       id: generateUniqueId(),
-      hierarchy: []
+      hierarchy: [{ id: "root", children: [], title: "Root" }]
     };
     this.addTree(newTree);
   };

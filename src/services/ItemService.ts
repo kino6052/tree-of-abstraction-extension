@@ -17,7 +17,6 @@ export interface IExtendedItem extends IItem {
 }
 
 export class ItemService {
-  root: Item;
   private static itemService: ItemService = (null as unknown) as ItemService;
   removeSubject: Subject<{ id: string }>;
   itemSubject: Subject<{
@@ -31,8 +30,8 @@ export class ItemService {
   itemSearchStateSubject: BehaviorSubject<string>;
   selectedItemStateSubject: BehaviorSubject<string[]>;
   hierarchyStateSubject: BehaviorSubject<HierarchyType[]>;
-  constructor(root?: Item) {
-    if (!root) root = new Item("root");
+  constructor() {
+    // if (!root) root = new Item("root");
 
     this.itemSubject = new Subject<{
       id: Id;
@@ -49,7 +48,7 @@ export class ItemService {
 
     this.hierarchyStateSubject = new BehaviorSubject<HierarchyType[]>([]);
 
-    this.selectedItemStateSubject = new BehaviorSubject<Id[]>([this.root.id]);
+    this.selectedItemStateSubject = new BehaviorSubject<Id[]>([]);
   }
 
   static getService = () => {
@@ -94,8 +93,8 @@ export class ItemService {
   };
 
   remove = (id: Id) => {
-    const root = this.root;
-    if (id === root.id) return;
+    // const root = this.root;
+    // if (id === root.id) return;
     this.removeSubject.next({ id });
   };
 
@@ -136,34 +135,26 @@ export class ItemService {
     cb: (result: Array<[IExtendedItem, number]>) => void,
     forEachCb?: (item: IExtendedItem) => void
   ) => {
-    const r = (
-      stack: Array<[IExtendedItem, number]> = [[item, 0]],
-      result: Array<[IExtendedItem, number]> = []
-      // counter: Counter = new Counter(1)
-    ) => {
-      while (stack.length > 0) {
-        const cur = stack.pop()!;
-        // counter.decrement();
-        result.push(cur);
-        this.getChildren(cur[0], children => {
-          children.reverse().forEach(c => {
-            if (typeof forEachCb === "function") forEachCb(c);
-            this.getIndentation(c, indentation => {
-              stack.push([c, indentation]);
-              // counter.increment();
-            });
+    const stack: Array<[IExtendedItem, number]> = [[item, 0]];
+    const result: Array<[IExtendedItem, number]> = [];
+    while (stack.length > 0) {
+      const cur = stack.pop()!;
+      result.push(cur);
+      this.getChildren(cur[0], children => {
+        children.reverse().forEach(c => {
+          if (typeof forEachCb === "function") forEachCb(c);
+          this.getIndentation(c, indentation => {
+            stack.push([c, indentation]);
           });
         });
-      }
-      // if (counter.count === 0)
-      cb(result);
-    };
-    r();
+      });
+    }
+    cb(result);
   };
 
-  updateHierarchy = () =>
+  updateHierarchy = (root: IExtendedItem) =>
     this.getHierarchy(
-      this.root,
+      root,
       hierarchy => {
         this.hierarchyStateSubject.next(hierarchy);
       },
@@ -248,12 +239,17 @@ export class Item implements IExtendedItem {
       }
     });
   };
-  constructor(title: string, parentId?: Id) {
-    const { removeSubject } = ItemService.getService();
-    this.id = generateUniqueId();
+  constructor(title: string, id: Id = generateUniqueId(), parentId?: Id) {
+    const { removeSubject, itemSubject } = ItemService.getService();
+    this.id = id;
     this.title = title;
     // Respond to getNodeById Requests
-    // subscriber.call(this, itemSubject, ({ id }) => id === this.id);
+    itemSubject
+      .pipe(
+        takeWhile(() => !this.done),
+        filter(({ id }) => id === this.id)
+      )
+      .subscribe(({ cb }) => cb(this));
     removeSubject.pipe(takeWhile(() => !this.done)).subscribe(({ id }) => {
       this.children = this.children.filter(c => c !== id);
       if (id === this.id) this.done = true;

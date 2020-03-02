@@ -25,7 +25,7 @@ const HierarchyItemWrapper = styled.div<{ indentation: number }>`
 
 export const HierarchyItem: React.SFC<{
   text: string;
-  indentation: number;
+  indentation?: number;
   collapsed?: boolean;
   isEditing?: boolean;
   onChange?: (e: React.ChangeEvent) => void;

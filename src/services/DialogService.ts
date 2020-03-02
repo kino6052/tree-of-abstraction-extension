@@ -1,17 +1,11 @@
 import { BehaviorSubject } from "rxjs";
 
 interface IDialog {
-  title: string;
-  message: string;
   isOpen: boolean;
-  content?: React.SFC;
-  onSubmit?: () => void;
-  onCancel?: () => void;
+  content?: React.ReactNode;
 }
 
 const DEFAULT_DIALOG_STATE = {
-  title: "",
-  message: "",
   isOpen: false
 };
 
@@ -32,20 +26,10 @@ export class DialogService {
     return DialogService.dialogService;
   };
 
-  openDialog = (
-    title: string,
-    message: string,
-    content?: React.SFC,
-    onSubmit?: () => void,
-    onCancel?: () => void
-  ) => {
+  openDialog = (content?: React.ReactNode) => {
     this.dialogSubject.next({
-      title,
-      message,
       isOpen: true,
-      content,
-      onSubmit,
-      onCancel
+      content
     });
   };
 

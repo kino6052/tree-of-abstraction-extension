@@ -50,9 +50,9 @@ const useStyles = makeStyles(theme => ({
 
 export const TreeItem: React.SFC<{ tree: Tree }> = props => {
   const classes = useStyles();
-  const { tree: { title = "" } = {} } = props;
+  const { tree: { title = "" } = {}, ...rest } = props;
   return (
-    <Card className={classes.root}>
+    <Card className={classes.root} {...rest}>
       <CardHeader
         avatar={
           <Avatar aria-label="recipe" className={classes.avatar}>

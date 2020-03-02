@@ -17,39 +17,23 @@ export interface IExtendedItem extends IItem {
 }
 
 export class ItemService {
-  private static itemService: ItemService = (null as unknown) as ItemService;
-  removeSubject: Subject<{ id?: string }>;
-  itemSubject: Subject<{
-    id: string;
+  private static itemService: ItemService;
+  itemSubject = new Subject<{
+    id: Id;
     cb: (item: IExtendedItem) => void;
-  }>;
-  parentSubject: Subject<{
-    id: string;
+  }>();
+  removeSubject = new Subject<{ id?: Id }>();
+
+  parentSubject = new Subject<{
+    id: Id;
     cb: (child: IExtendedItem) => void;
-  }>;
-  itemSearchStateSubject: BehaviorSubject<string>;
-  selectedItemStateSubject: BehaviorSubject<string[]>;
-  hierarchyStateSubject: BehaviorSubject<HierarchyType[]>;
-  constructor() {
-    // if (!root) root = new Item("root");
+  }>();
 
-    this.itemSubject = new Subject<{
-      id: Id;
-      cb: (item: IExtendedItem) => void;
-    }>();
-    this.removeSubject = new Subject<{ id?: Id }>();
+  itemSearchStateSubject = new BehaviorSubject<string>("");
 
-    this.parentSubject = new Subject<{
-      id: Id;
-      cb: (child: IExtendedItem) => void;
-    }>();
+  hierarchyStateSubject = new BehaviorSubject<HierarchyType[]>([]);
 
-    this.itemSearchStateSubject = new BehaviorSubject<string>("");
-
-    this.hierarchyStateSubject = new BehaviorSubject<HierarchyType[]>([]);
-
-    this.selectedItemStateSubject = new BehaviorSubject<Id[]>([]);
-  }
+  selectedItemStateSubject = new BehaviorSubject<Id[]>([]);
 
   static getService = () => {
     if (ItemService.itemService) return ItemService.itemService;

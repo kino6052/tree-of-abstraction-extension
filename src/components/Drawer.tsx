@@ -10,7 +10,7 @@ import Typography from "@material-ui/core/Typography";
 import Add from "@material-ui/icons/Add";
 import styled from "styled-components";
 import { ActionService, EAction } from "../services/ActionService";
-import { HistoryService } from "../services/HistoryService";
+import { HistoryService, EPath } from "../services/HistoryService";
 import { useSharedState } from "../utils";
 import { NoteItem } from "./NoteItem";
 import { MainMenu, TreeMenu } from "./SideMenus";
@@ -78,10 +78,10 @@ export const AppDrawer: React.SFC = () => {
       anchor="left"
     >
       <Switch>
-        <Route exact path="/">
+        <Route exact path={EPath.Default}>
           <MainMenu />
         </Route>
-        <Route path="/tree">
+        <Route path={EPath.Tree}>
           <TreeMenu />
         </Route>
       </Switch>
@@ -113,10 +113,10 @@ export const Main: React.SFC = () => {
     <main className={"content"}>
       <div className={"toolbar"} />
       <Switch>
-        <Route exact path="/">
+        <Route exact path={EPath.Default}>
           <TreeList />
         </Route>
-        <Route path="/tree">
+        <Route path={EPath.Tree}>
           <NoteItem />
           <NoteItem />
           <NoteItem />
@@ -127,28 +127,67 @@ export const Main: React.SFC = () => {
 };
 
 export const Header: React.SFC = () => {
-  const actionService = ActionService.getService();
   return (
     <AppBar position="fixed" className={"appBar"}>
       <Toolbar classes={{ root: "root" }}>
-        <Typography variant="h6" noWrap>
-          Root
-        </Typography>
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="end"
-          onClick={() =>
-            actionService.next(EAction.OpenDialog, {
-              content: <CreateNewTreeDialog />
-            })
-          }
-          // className={clsx(open && classes.hide)}
-        >
-          <Add />
-        </IconButton>
+        <Switch>
+          <Route exact path={EPath.Default}>
+            <MainMenuHeaderContent />
+          </Route>
+          <Route path={EPath.Tree}>
+            <TreeHeaderContent />
+          </Route>
+        </Switch>
       </Toolbar>
     </AppBar>
+  );
+};
+
+export const MainMenuHeaderContent: React.SFC = () => {
+  const actionService = ActionService.getService();
+  return (
+    <React.Fragment>
+      <Typography variant="h6" noWrap>
+        Toolset
+      </Typography>
+      <IconButton
+        color="inherit"
+        aria-label="open drawer"
+        edge="end"
+        onClick={() =>
+          actionService.next(EAction.OpenDialog, {
+            content: <CreateNewTreeDialog />
+          })
+        }
+      >
+        <Add />
+      </IconButton>
+    </React.Fragment>
+  );
+};
+
+export const TreeHeaderContent: React.SFC = () => {
+  const actionService = ActionService.getService();
+  const treeService = TreeService.getService();
+  const { title = "" } = treeService.activeTree || {};
+  return (
+    <React.Fragment>
+      <Typography variant="h6" noWrap>
+        {title}
+      </Typography>
+      <IconButton
+        color="inherit"
+        aria-label="open drawer"
+        edge="end"
+        onClick={() =>
+          actionService.next(EAction.OpenDialog, {
+            content: <div />
+          })
+        }
+      >
+        <Add />
+      </IconButton>
+    </React.Fragment>
   );
 };
 

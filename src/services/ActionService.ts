@@ -13,7 +13,8 @@ export enum EAction {
   GoToTree = "GoToTree",
   EditItem = "EditItem",
   RemoveItem = "RemoveItem",
-  AddChild = "AddChild"
+  AddChild = "AddChild",
+  AddNote = "AddNote"
 }
 
 export type TActionSubject = BehaviorSubject<Entry<keyof IActionParam>>;
@@ -31,6 +32,7 @@ export interface IActionParam {
   [EAction.AddChild]: { id: Id };
   [EAction.EditItem]: { id: Id };
   [EAction.RemoveItem]: { id: Id };
+  [EAction.AddNote]: {};
 }
 
 export type Entry<T extends keyof IActionParam> = [T, IActionParam[T]];

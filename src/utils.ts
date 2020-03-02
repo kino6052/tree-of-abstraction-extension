@@ -19,6 +19,7 @@ export const useSharedState = <T>(
 
 export enum EPersistenceMessage {
   SaveTree = "SaveTree",
+  SaveTreeIds = "SaveTreeIds",
   LoadTrees = "LoadTrees",
   TreesLoaded = "TreesLoaded"
 }

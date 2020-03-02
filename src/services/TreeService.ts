@@ -29,32 +29,37 @@ export class TreeService {
     const itemService = ItemService.getService();
     const historyService = HistoryService.getService();
 
-    this.onLoadTrees();
-    this.loadTrees();
-
+    // This is the update logic for every action
+    // on hierarchy and notes
     combineLatest(itemService.hierarchyStateSubject)
       .pipe(
         skip(1),
         skipWhile(() => !historyService.isTreePath())
       )
       .subscribe(([hierarchy]) => {
+        // TODO: Simplify
         const activeTree = this.getActiveTree();
         if (!activeTree) return;
         const { id } = this.activeTree;
-        const [tree, trees] = this.getTreeById(id);
+        const [tree] = this.getTreeById(id);
         if (!tree) return;
         tree.hierarchy = itemService.getItemObjectsFromHierarchy(hierarchy);
-        this.saveTrees(trees);
+        this.saveTree(tree);
       });
 
+    // This is OK
     this.treeSubject
       .pipe(
-        skip(1),
+        skip(2), // Skip subscription and initial load
         skipWhile(() => !historyService.isDefaultPath())
       )
       .subscribe(trees => {
-        this.saveTrees(trees);
+        this.saveTreeIds(trees);
       });
+
+    // Load Trees from Sync Storage
+    this.onLoadTrees();
+    this.loadTrees();
   }
 
   generateTree = (tree: Tree) => {
@@ -83,15 +88,19 @@ export class TreeService {
     document.addEventListener(
       EPersistenceMessage.TreesLoaded,
       (e: CustomEvent) => {
-        // console.warn("Trees Loaded", e);
         const { detail: { trees = [] as Tree[] } = {} } = e;
         this.treeSubject.next(trees);
       }
     );
   };
 
-  saveTrees = (trees: Tree[]) => {
-    sendMessage(EPersistenceMessage.SaveTree, { trees });
+  saveTree = (tree: Tree) => {
+    sendMessage(EPersistenceMessage.SaveTree, { tree });
+  };
+
+  saveTreeIds = (trees: Tree[]) => {
+    const treeIds = trees.map(t => t.id);
+    sendMessage(EPersistenceMessage.SaveTreeIds, { treeIds });
   };
 
   next = (trees: Tree[]) => {
@@ -99,8 +108,11 @@ export class TreeService {
   };
 
   addTree = (tree: Tree) => {
+    if (!tree) return;
     const old = this.treeSubject.getValue();
-    this.treeSubject.next([...old, tree]);
+    const newTrees = [...old, tree];
+    this.treeSubject.next(newTrees);
+    this.saveTree(tree);
   };
 
   getTrees = () => this.treeSubject.getValue();

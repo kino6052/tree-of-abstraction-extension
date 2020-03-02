@@ -6,7 +6,7 @@ export const SearchWrapper = styled.div`
   display: flex;
   align-items: center;
   & .root {
-    width: 200px;
+    width: 90%;
     margin: 24px auto !important;
   }
 `;

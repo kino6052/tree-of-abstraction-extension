@@ -4,8 +4,9 @@ import { filter } from "rxjs/internal/operators/filter";
 import { HistoryService, EPath } from "./HistoryService";
 import { DialogService } from "./DialogService";
 import { TreeService } from "./TreeService";
-import { ItemService, Item } from "./ItemService";
+import { ItemService, EditableItem } from "./ItemService";
 import { generateUniqueId } from "../utils";
+import { NoteService, Note } from "./NoteService";
 
 const subscribe = <T extends keyof IActionParam>(
   subject: BehaviorSubject<Entry<keyof IActionParam>>,
@@ -16,12 +17,64 @@ const subscribe = <T extends keyof IActionParam>(
 };
 
 export const Subscriptions = {
-  onAddChild: (subject: TActionSubject) => {
-    subscribe(subject, EAction.AddChild, ([_, { id }]) => {
+  onAddNote: (subject: TActionSubject) => {
+    subscribe(subject, EAction.AddNote, ([_, { title, html }]) => {
+      const noteService = NoteService.getService();
+      new Note(title, generateUniqueId(), html);
+      noteService.updateNotes();
+    });
+  },
+  onToggleCollapse: (subject: TActionSubject) => {
+    subscribe(subject, EAction.ToggleCollapse, ([_, { id }]) => {
       const itemService = ItemService.getService();
-      new Item("Untitled", generateUniqueId(), id);
+      const update = () => {
+        // Update Hierarchy (Think of a more elegant way)
+        const root = itemService.getRoot();
+        if (root) itemService.updateHierarchy(root);
+      };
+      itemService.getItem(id, (item: EditableItem) => {
+        item.isCollapsed = !item.isCollapsed;
+        if (item.isCollapsed) {
+          itemService.collapseAll(id, update);
+        } else {
+          itemService.uncollapseAll(item, update);
+        }
+      });
+    });
+  },
+  onHierarchyInputChange: (subject: TActionSubject) => {
+    subscribe(subject, EAction.HierarchyInputChange, ([_, { id, e }]) => {
+      // @ts-ignore
+      const { target: { value = "" } = {} } = e;
+      const itemService = ItemService.getService();
+      itemService.getItem(id, item => {
+        item.title = value;
+      });
+      // Update Hierarchy (Think of a more elegant way)
       const root = itemService.getRoot();
       if (root) itemService.updateHierarchy(root);
+    });
+  },
+  onEditItem: (subject: TActionSubject) => {
+    subscribe(subject, EAction.EditItem, ([_, { id }]) => {
+      const itemService = ItemService.getService();
+      itemService.getItem(id, (item: EditableItem) => {
+        item.isEditing = !item.isEditing;
+      });
+      // Update Hierarchy (Think of a more elegant way)
+      const root = itemService.getRoot();
+      if (root) itemService.updateHierarchy(root);
+    });
+  },
+  onAddChild: (subject: TActionSubject) => {
+    subscribe(subject, EAction.AddChild, ([_, { id }]) => {
+      new EditableItem("Untitled", generateUniqueId(), id);
+      const itemService = ItemService.getService();
+      itemService.uncollapseChildren(id, () => {
+        // Update Hierarchy (Think of a more elegant way)
+        const root = itemService.getRoot();
+        if (root) itemService.updateHierarchy(root);
+      });
     });
   },
   onGoToTree: (subject: TActionSubject) => {
@@ -29,12 +82,16 @@ export const Subscriptions = {
       const treeService = TreeService.getService();
       const historyService = HistoryService.getService();
       const itemService = ItemService.getService();
+      const noteService = NoteService.getService();
       itemService.reset();
       treeService.setActiveTree(tree);
       const root = treeService.generateTree(tree);
       itemService.getHierarchy(root, result => {
         itemService.hierarchyStateSubject.next(result);
-        historyService.next(EPath.Tree);
+        noteService.getAllNotes(notes => {
+          noteService.notesStateSubject.next(notes);
+          historyService.next(EPath.Tree);
+        });
       });
     });
   },

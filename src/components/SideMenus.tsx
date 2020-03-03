@@ -8,9 +8,13 @@ import {
 } from "./HierarchyItem";
 import { ActionService, EAction } from "../services/ActionService";
 import ArrowBack from "@material-ui/icons/ArrowBack";
+import Upload from "@material-ui/icons/CloudUpload";
 import { Search } from "./Search";
-import { ItemService } from "../services/ItemService";
+import { ItemService, EditableItem } from "../services/ItemService";
 import { useSharedState } from "../utils";
+import { TreeService } from "../services/TreeService";
+import IconButton from "@material-ui/core/IconButton";
+import { MenuComponent } from "./Menu";
 
 export const MainMenu: React.SFC = () => {
   const actionService = ActionService.getService();
@@ -32,21 +36,36 @@ export const TreeMenu: React.SFC = () => {
   const actionService = ActionService.getService();
   const { hierarchyStateSubject } = ItemService.getService();
   const [hierarchy] = useSharedState(hierarchyStateSubject);
+  const {
+    activeTree: { title = "", id = "" } = {},
+    downloadTree
+  } = TreeService.getService();
   return (
     <React.Fragment>
       <div className={"toolbar"}>
-        <ArrowBack
-          onClick={() =>
-            actionService.next(EAction.ChangeLocation, { location: "/" })
-          }
+        <IconButton>
+          <ArrowBack
+            onClick={() =>
+              actionService.next(EAction.ChangeLocation, { location: "/" })
+            }
+          />
+        </IconButton>
+        <Typography>{title}</Typography>
+        <MenuComponent
+          options={[
+            { text: "Download", onClick: () => downloadTree(id) },
+            { text: "Upload", onClick: console.warn }
+          ]}
         />
-        <Typography>Personal Library</Typography>
       </div>
       <Divider />
       <Search />
       <HierarchyList>
         {hierarchy.map(([item, indentation]) => (
-          <HierarchyItem item={item} indentation={indentation} />
+          <HierarchyItem
+            item={item as EditableItem}
+            indentation={indentation}
+          />
         ))}
       </HierarchyList>
     </React.Fragment>

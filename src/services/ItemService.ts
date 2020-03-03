@@ -47,8 +47,15 @@ export class ItemService {
 
   getItemObjectsFromHierarchy = (hierarchy: HierarchyType[]): IItem[] =>
     hierarchy.map(([i]) => {
-      const { id, title, children, parentId } = i;
-      return { id, title, children, parentId };
+      const {
+        id,
+        title,
+        children,
+        parentId,
+        isCollapsed,
+        visible
+      } = i as EditableItem;
+      return { id, title, children, parentId, isCollapsed, visible };
     });
 
   getItem = (id: Id, cb: (item: IExtendedItem) => void) => {
@@ -168,17 +175,48 @@ export class ItemService {
   };
 
   collapseAll = (id: Id, cb: () => void) => {
-    this.getItem(id, item => {
-      this.getHierarchy(item, cb, item => {
+    this.getItem(id, (item: EditableItem) => {
+      item.isCollapsed = true;
+      this.getHierarchy(item, cb, (item: EditableItem) => {
         item.visible = false;
       });
     });
   };
 
+  uncollapseAll = (item: EditableItem, cb: () => void) => {
+    item.isCollapsed = false;
+    const stack: EditableItem[] = [item];
+    while (stack.length > 0) {
+      const cur = stack.pop()!;
+      cur.visible = true;
+      if (!cur.isCollapsed) {
+        this.getChildren(
+          cur,
+          () => {},
+          (c: EditableItem) => {
+            stack.push(c);
+          }
+        );
+      }
+    }
+    cb();
+  };
+
   uncollapseChildren = (id: Id, cb: () => void) => {
-    this.getItem(id, item => {
-      this.getChildren(item, cb, item => {
-        item.visible = true;
+    this.getItem(id, (item: EditableItem) => {
+      item.isCollapsed = false;
+      this.getChildren(item, cb, child => {
+        child.visible = true;
+      });
+    });
+  };
+
+  collapseChildren = (id: Id, cb: () => void) => {
+    this.getItem(id, (item: EditableItem) => {
+      item.isCollapsed = true;
+      this.getChildren(item, cb, (child: EditableItem) => {
+        child.visible = false;
+        child.isCollapsed = true;
       });
     });
   };
@@ -233,6 +271,8 @@ export class Item implements IExtendedItem {
   done: boolean = false;
   children: Id[] = [];
   meta: {} = {};
+  isEditing: boolean = false;
+  isCollapsed: boolean = true;
   private addChild = (parentId: Id) => {
     const { itemSubject } = ItemService.getService();
     itemSubject.next({
@@ -262,5 +302,21 @@ export class Item implements IExtendedItem {
       this.parentId = parentId;
       this.addChild(parentId);
     }
+  }
+}
+
+export class EditableItem extends Item {
+  isEditing: boolean = false;
+  isCollapsed: boolean = true;
+  constructor(
+    title: string,
+    id: Id,
+    parentId?: Id,
+    visible = true,
+    isCollapsed = false
+  ) {
+    super(title, id, parentId);
+    this.visible = visible;
+    this.isCollapsed = isCollapsed;
   }
 }

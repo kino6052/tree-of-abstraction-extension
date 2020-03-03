@@ -107,9 +107,10 @@ export class Note implements INote {
   done: boolean = false;
   meta: {} = {};
   visible: boolean = true;
-  constructor(title: string, id: Id) {
+  constructor(title: string, id: Id, html = "") {
     this.id = id;
     this.title = title;
+    this.html = html;
     const noteService = NoteService.getService();
     const itemService = ItemService.getService();
     // Respond to getNodeById Requests

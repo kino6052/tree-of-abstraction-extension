@@ -11,6 +11,7 @@ import { AppDrawer } from "./AppDrawer";
 import { Header } from "./Header";
 import { NoteItem } from "./NoteItem";
 import { TreeItem } from "./TreeItem";
+import { NoteService } from "../services/NoteService";
 
 const drawerWidth = 400;
 
@@ -79,6 +80,19 @@ export const TreeList: React.SFC = () => {
   );
 };
 
+export const NoteList: React.SFC = () => {
+  const actionService = ActionService.getService();
+  const { notesStateSubject } = NoteService.getService();
+  const [notes] = useSharedState(notesStateSubject);
+  return (
+    <React.Fragment>
+      {notes.map(note => (
+        <NoteItem note={note} />
+      ))}
+    </React.Fragment>
+  );
+};
+
 export const Main: React.SFC = () => {
   return (
     <main className={"content"}>
@@ -88,9 +102,7 @@ export const Main: React.SFC = () => {
           <TreeList />
         </Route>
         <Route path={EPath.Tree}>
-          <NoteItem />
-          <NoteItem />
-          <NoteItem />
+          <NoteList />
         </Route>
       </Switch>
     </main>

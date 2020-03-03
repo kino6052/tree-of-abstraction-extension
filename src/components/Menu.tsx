@@ -73,7 +73,10 @@ export const MenuComponent: React.SFC<{
                 padding: "12px"
               }}
               // key={option}
-              onClick={onClick}
+              onClick={e => {
+                handleClose(setAnchorEl);
+                onClick(e);
+              }}
             >
               <Typography style={{ width: "160px" }}>{text}</Typography>
             </MenuItem>

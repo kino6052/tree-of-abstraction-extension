@@ -12,11 +12,14 @@ import {
 } from "@material-ui/core";
 import { MenuComponent } from "./Menu";
 import { ActionService, EAction } from "../services/ActionService";
-import { IExtendedItem } from "../services/ItemService";
+import { IExtendedItem, EditableItem } from "../services/ItemService";
 
-const HierarchyItemWrapper = styled.div<{ indentation: number }>`
+const HierarchyItemWrapper = styled.div<{
+  visible: boolean;
+  indentation: number;
+}>`
   margin-left: ${({ indentation }) => indentation * 16}px;
-  display: flex;
+  display: ${({ visible }) => (visible ? "flex" : "none")};
   flex-direction: row;
   .icon {
     margin-right: 8px;
@@ -42,7 +45,7 @@ export const MainMenuHierarchyItem: React.SFC<{
   } = props;
   const actionService = ActionService.getService();
   return (
-    <HierarchyItemWrapper {...rest} indentation={indentation}>
+    <HierarchyItemWrapper {...rest} visible={true} indentation={indentation}>
       <ListItem>
         <ListItemIcon className="icon">
           <React.Fragment>
@@ -88,29 +91,25 @@ export const MainMenuHierarchyItem: React.SFC<{
 };
 
 export const HierarchyItem: React.SFC<{
-  item: IExtendedItem;
+  item: EditableItem;
   indentation?: number;
-  collapsed?: boolean;
-  isEditing?: boolean;
-  onChange?: (e: React.ChangeEvent) => void;
 }> = props => {
   const {
-    item: { id, title },
+    item: { id, title, isCollapsed, isEditing, visible },
     indentation = 0,
-    collapsed = false,
-    isEditing = false,
-    onChange,
     ...rest
   } = props;
   const actionService = ActionService.getService();
   return (
-    <HierarchyItemWrapper {...rest} indentation={indentation}>
+    <HierarchyItemWrapper {...rest} visible={visible} indentation={indentation}>
       <ListItem>
         <ListItemIcon className="icon">
-          <React.Fragment>
-            {collapsed && <ExpandMore />}
-            {!collapsed && <Remove />}
-          </React.Fragment>
+          <div
+            onClick={() => actionService.next(EAction.ToggleCollapse, { id })}
+          >
+            {isCollapsed && <ExpandMore />}
+            {!isCollapsed && <Remove />}
+          </div>
         </ListItemIcon>
         <ListItemIcon className="icon">
           <Book />
@@ -124,7 +123,9 @@ export const HierarchyItem: React.SFC<{
         {isEditing && (
           <Input
             value={title}
-            onChange={onChange}
+            onChange={e =>
+              actionService.next(EAction.HierarchyInputChange, { id, e })
+            }
             // secondary={secondary ? "Secondary text" : null}
           />
         )}

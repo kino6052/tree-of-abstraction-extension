@@ -2,6 +2,7 @@ import { BehaviorSubject } from "rxjs";
 import { Subscriptions } from "./Subscriptions";
 import { Tree } from "./TreeService";
 import { Id } from "../utils";
+import { ChangeEvent } from "react";
 
 export enum EAction {
   CreateNewTree = "CreateNewTree",
@@ -14,7 +15,9 @@ export enum EAction {
   EditItem = "EditItem",
   RemoveItem = "RemoveItem",
   AddChild = "AddChild",
-  AddNote = "AddNote"
+  AddNote = "AddNote",
+  HierarchyInputChange = "HierarchyInputChange",
+  ToggleCollapse = "ToggleCollapse"
 }
 
 export type TActionSubject = BehaviorSubject<Entry<keyof IActionParam>>;
@@ -32,7 +35,14 @@ export interface IActionParam {
   [EAction.AddChild]: { id: Id };
   [EAction.EditItem]: { id: Id };
   [EAction.RemoveItem]: { id: Id };
-  [EAction.AddNote]: {};
+  [EAction.AddNote]: { title: string; html: string };
+  [EAction.HierarchyInputChange]: {
+    id: Id;
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>;
+  };
+  [EAction.ToggleCollapse]: {
+    id: Id;
+  };
 }
 
 export type Entry<T extends keyof IActionParam> = [T, IActionParam[T]];

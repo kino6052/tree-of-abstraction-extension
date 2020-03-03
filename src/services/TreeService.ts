@@ -1,13 +1,13 @@
-import { BehaviorSubject, combineLatest } from "rxjs";
+import { BehaviorSubject, combineLatest, timer } from "rxjs";
 import {
   generateUniqueId,
   Id,
   sendMessage,
   EPersistenceMessage
 } from "../utils";
-import { Item, IItem, ItemService } from "./ItemService";
-import { INote } from "./NoteService";
-import { skip, filter, skipWhile } from "rxjs/operators";
+import { EditableItem, IItem, ItemService } from "./ItemService";
+import { INote, NoteService } from "./NoteService";
+import { skip, filter, skipWhile, debounce } from "rxjs/operators";
 import { HistoryService } from "./HistoryService";
 
 export interface Tree {
@@ -16,6 +16,8 @@ export interface Tree {
   hierarchy: IItem[];
   notes: INote[];
 }
+
+const DEBOUNCE_INTERVAL = 1000;
 
 export class TreeService {
   treeSubject: BehaviorSubject<Tree[]>;
@@ -27,16 +29,22 @@ export class TreeService {
     this.treeSubject = new BehaviorSubject([]);
 
     const itemService = ItemService.getService();
+    const noteService = NoteService.getService();
+
     const historyService = HistoryService.getService();
 
     // This is the update logic for every action
     // on hierarchy and notes
-    combineLatest(itemService.hierarchyStateSubject)
+    combineLatest(
+      itemService.hierarchyStateSubject,
+      noteService.notesStateSubject
+    )
       .pipe(
         skip(1),
-        skipWhile(() => !historyService.isTreePath())
+        skipWhile(() => !historyService.isTreePath()),
+        debounce(() => timer(DEBOUNCE_INTERVAL))
       )
-      .subscribe(([hierarchy]) => {
+      .subscribe(([hierarchy, notes]) => {
         // TODO: Simplify
         const activeTree = this.getActiveTree();
         if (!activeTree) return;
@@ -44,6 +52,7 @@ export class TreeService {
         const [tree] = this.getTreeById(id);
         if (!tree) return;
         tree.hierarchy = itemService.getItemObjectsFromHierarchy(hierarchy);
+        tree.notes = notes;
         this.saveTree(tree);
       });
 
@@ -51,7 +60,8 @@ export class TreeService {
     this.treeSubject
       .pipe(
         skip(2), // Skip subscription and initial load
-        skipWhile(() => !historyService.isDefaultPath())
+        skipWhile(() => !historyService.isDefaultPath()),
+        debounce(() => timer(DEBOUNCE_INTERVAL))
       )
       .subscribe(trees => {
         this.saveTreeIds(trees);
@@ -64,8 +74,21 @@ export class TreeService {
 
   generateTree = (tree: Tree) => {
     return tree.hierarchy.map(
-      ({ id, parentId, title }) => new Item(title, id, parentId)
+      ({ id, parentId, title, isCollapsed, visible }: EditableItem) =>
+        new EditableItem(title, id, parentId, visible, isCollapsed)
     )[0];
+  };
+
+  downloadTree = (id: Id) => {
+    const result = this.treeSubject.getValue().find(t => t.id === id);
+    if (!result) return;
+    const dataStr =
+      "data:text/json;charset=utf-8," +
+      encodeURIComponent(JSON.stringify(result));
+    const dlAnchorElem = document.createElement("a");
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", "tree.json");
+    dlAnchorElem.click();
   };
 
   static getService = () => {

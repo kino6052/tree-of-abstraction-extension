@@ -11,6 +11,7 @@ export const AlertDialog: React.SFC = () => {
   return (
     <div>
       <Dialog
+        fullWidth
         open={isOpen}
         onClose={() => actionService.next(EAction.CloseDialog, {})}
         aria-labelledby="alert-dialog-title"

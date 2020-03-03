@@ -86,10 +86,10 @@ export const Subscriptions = {
       itemService.reset();
       treeService.setActiveTree(tree);
       const root = treeService.generateTree(tree);
-      itemService.getHierarchy(root, result => {
-        itemService.hierarchyStateSubject.next(result);
+      itemService.getHierarchy(root, hierarchy => {
         noteService.getAllNotes(notes => {
           noteService.notesStateSubject.next(notes);
+          itemService.hierarchyStateSubject.next(hierarchy);
           historyService.next(EPath.Tree);
         });
       });

@@ -23,6 +23,28 @@ const subscribe = <T extends keyof IActionParam>(
 };
 
 export const Subscriptions = {
+  onRemoveItem: (subject: TActionSubject) => {
+    subscribe(subject, EAction.RemoveItem, ([_, { id }]) => {
+      const itemService = ItemService.getService();
+      itemService.remove(id);
+      itemService.update();
+    });
+  },
+  onRemoveNote: (subject: TActionSubject) => {
+    subscribe(subject, EAction.RemoveNote, ([_, { id }]) => {
+      const noteService = NoteService.getService();
+      noteService.getNote(id, note => {
+        note.done = true;
+        noteService.updateNotes();
+      });
+    });
+  },
+  onRemoveTree: (subject: TActionSubject) => {
+    subscribe(subject, EAction.RemoveTree, ([_, { id }]) => {
+      const treeService = TreeService.getService();
+      treeService.removeTree(id);
+    });
+  },
   onRemoveLabel: (subject: TActionSubject) => {
     subscribe(subject, EAction.RemoveLabel, ([_, { note, label }]) => {
       const noteService = NoteService.getService();

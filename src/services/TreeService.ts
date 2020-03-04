@@ -148,6 +148,18 @@ export class TreeService {
     this.saveTree(tree);
   };
 
+  removeTree = (id: Id) => {
+    if (!id) return;
+    const old = this.treeSubject.getValue();
+    const newTrees = old.filter(t => t.id !== id);
+    this.treeSubject.next(newTrees);
+  };
+
+  updateTrees = () => {
+    const old = this.treeSubject.getValue();
+    this.treeSubject.next(old);
+  };
+
   getTrees = () => this.treeSubject.getValue();
 
   setActiveTree = (tree: Tree) => (this.activeTree = tree);

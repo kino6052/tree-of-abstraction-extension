@@ -10,6 +10,9 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import * as React from "react";
 import styled from "styled-components";
 import { Tree } from "../services/TreeService";
+import { EAction, ActionService } from "../services/ActionService";
+import { MenuComponent } from "./Menu";
+import { RemoveTreeDialog } from "./DialogInputs";
 
 export const TreeItemWrapper = styled.div``;
 
@@ -43,9 +46,11 @@ const useStyles = makeStyles(theme => ({
 
 export const TreeItem: React.SFC<{ tree: Tree }> = props => {
   const classes = useStyles();
-  const { tree: { title = "" } = {}, ...rest } = props;
+  const actionService = ActionService.getService();
+  const { tree = {} as Tree } = props;
+  const { title } = tree as Tree;
   return (
-    <Card className={classes.root} {...rest}>
+    <Card className={classes.root}>
       <CardHeader
         avatar={
           <Avatar aria-label="recipe" className={classes.avatar}>
@@ -54,17 +59,26 @@ export const TreeItem: React.SFC<{ tree: Tree }> = props => {
         }
         action={
           <IconButton aria-label="settings">
-            <MoreVertIcon />
+            <MenuComponent
+              options={[
+                {
+                  text: "Remove",
+                  onClick: () => {
+                    actionService.next(EAction.OpenDialog, {
+                      content: <RemoveTreeDialog tree={tree} />
+                    });
+                  }
+                }
+              ]}
+            />
           </IconButton>
         }
-        title={title}
-        subheader={title}
+        title={
+          <div onClick={() => actionService.next(EAction.GoToTree, { tree })}>
+            {title}
+          </div>
+        }
       />
-      <CardContent>
-        <Typography variant="body2" color="textSecondary" component="p">
-          {title}
-        </Typography>
-      </CardContent>
     </Card>
   );
 };

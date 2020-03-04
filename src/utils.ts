@@ -52,6 +52,7 @@ ${Math.round(Math.random() * 10000)}`;
 
 export const onUpload = (cb: (json: string) => void) => {
   const input = document.querySelector(".jsonUpload");
+  console.warn("input");
   if (!input) return;
   // @ts-ignore
   input.onchange = function(evt) {
@@ -64,9 +65,11 @@ export const onUpload = (cb: (json: string) => void) => {
       let file = files[0];
       let reader = new FileReader();
       reader.onload = event => {
+        console.warn("h");
         // @ts-ignore
         const { target: { result = "{}" } = {} } = event || {};
         try {
+          console.warn("i");
           JSON.parse(result);
           cb(result);
         } catch (e) {

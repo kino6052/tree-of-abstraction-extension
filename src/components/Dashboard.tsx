@@ -59,13 +59,7 @@ export const TreeList: React.SFC = () => {
   return (
     <React.Fragment>
       {trees.map(tree => (
-        <TreeItem
-          tree={tree}
-          // @ts-ignore
-          onClick={() => {
-            actionService.next(EAction.GoToTree, { tree });
-          }}
-        />
+        <TreeItem tree={tree} />
       ))}
     </React.Fragment>
   );

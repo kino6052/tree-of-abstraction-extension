@@ -22,6 +22,7 @@ import { ActionService, EAction } from "../services/ActionService";
 import { FormControl, TextField } from "@material-ui/core";
 import Close from "@material-ui/icons/Close";
 import { unboxEvent } from "../utils";
+import { RemoveNoteDialog } from "./DialogInputs";
 
 export const NoteItemWrapper = styled.div``;
 
@@ -150,7 +151,9 @@ export const NoteItem: React.SFC<{ note: INote }> = ({ note }) => {
                   {
                     text: "Remove",
                     onClick: () => {
-                      actionService.next(EAction.RemoveNote, { id });
+                      actionService.next(EAction.OpenDialog, {
+                        content: <RemoveNoteDialog note={note} />
+                      });
                     }
                   }
                 ]}

@@ -15,8 +15,10 @@ import { ActionService, EAction } from "../services/ActionService";
 import {
   IExtendedItem,
   EditableItem,
-  ItemService
+  ItemService,
+  Item
 } from "../services/ItemService";
+import { RemoveItemDialog } from "./DialogInputs";
 
 const HierarchyItemWrapper = styled.div<{
   visible: boolean;
@@ -67,6 +69,7 @@ export const HierarchyItem: React.SFC<{
   item: EditableItem;
   indentation?: number;
 }> = props => {
+  const { item } = props;
   const {
     item: { id, title, isCollapsed, isEditing, visible },
     indentation = 0,
@@ -129,7 +132,10 @@ export const HierarchyItem: React.SFC<{
           },
           {
             text: "Remove",
-            onClick: () => actionService.next(EAction.RemoveItem, { id })
+            onClick: () =>
+              actionService.next(EAction.OpenDialog, {
+                content: <RemoveItemDialog item={item} />
+              })
           }
         ]}
       />

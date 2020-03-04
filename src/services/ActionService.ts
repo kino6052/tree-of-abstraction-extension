@@ -24,7 +24,8 @@ export enum EAction {
   UpdateHierarchy = "UpdateHierarchy",
   RemoveNote = "RemoveNote",
   EditNote = "EditNote",
-  RemoveLabel = "RemoveLabel"
+  RemoveLabel = "RemoveLabel",
+  RemoveTree = "RemoveTree"
 }
 
 export type TActionSubject = BehaviorSubject<Entry<keyof IActionParam>>;
@@ -45,6 +46,7 @@ export interface IActionParam {
   [EAction.RemoveNote]: { id: Id };
   [EAction.EditNote]: { id: Id };
   [EAction.RemoveLabel]: { note: INote; label: IExtendedItem };
+  [EAction.RemoveTree]: { id: Id };
   [EAction.OpenDialog]: {
     content: React.ReactNode;
   };

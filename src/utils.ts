@@ -17,6 +17,18 @@ export const useSharedState = <T>(
   return [value, newSetState];
 };
 
+export const unboxEvent = (
+  e: React.ChangeEvent | React.KeyboardEvent | React.MouseEvent
+): string => {
+  const {
+    target: {
+      // @ts-ignore
+      value = ""
+    } = {}
+  } = e || {};
+  return value;
+};
+
 export enum EPersistenceMessage {
   SaveTree = "SaveTree",
   SaveTreeIds = "SaveTreeIds",
@@ -37,3 +49,33 @@ ${Math.round(Math.random() * 10000)}-\
 ${Math.round(Math.random() * 10000)}-\
 ${Math.round(Math.random() * 10000)}-\
 ${Math.round(Math.random() * 10000)}`;
+
+export const onUpload = (cb: (json: string) => void) => {
+  const input = document.querySelector(".jsonUpload");
+  if (!input) return;
+  // @ts-ignore
+  input.onchange = function(evt) {
+    try {
+      let files = evt.target.files;
+      if (!files.length) {
+        alert("No file selected!");
+        return;
+      }
+      let file = files[0];
+      let reader = new FileReader();
+      reader.onload = event => {
+        // @ts-ignore
+        const { target: { result = "{}" } = {} } = event || {};
+        try {
+          JSON.parse(result);
+          cb(result);
+        } catch (e) {
+          console.warn("Could not parse JSON");
+        }
+      };
+      reader.readAsText(file);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+};

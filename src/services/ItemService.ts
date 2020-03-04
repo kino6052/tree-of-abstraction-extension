@@ -296,8 +296,6 @@ export class Item implements IExtendedItem {
   done: boolean = false;
   children: Id[] = [];
   meta: {} = {};
-  isEditing: boolean = false;
-  isCollapsed: boolean = true;
   private addChild = (parentId: Id) => {
     const { itemSubject } = ItemService.getService();
     itemSubject.next({

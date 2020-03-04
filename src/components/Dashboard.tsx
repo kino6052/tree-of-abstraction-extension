@@ -9,9 +9,9 @@ import { TreeService } from "../services/TreeService";
 import { useSharedState } from "../utils";
 import { AppDrawer } from "./AppDrawer";
 import { Header } from "./Header";
-import { NoteItem } from "./NoteItem";
+import { NoteItem, NoteEditor } from "./NoteItem";
 import { TreeItem } from "./TreeItem";
-import { NoteService } from "../services/NoteService";
+import { NoteService, EditableNote } from "../services/NoteService";
 
 const drawerWidth = 400;
 
@@ -77,9 +77,9 @@ export const NoteList: React.SFC = () => {
   const [notes] = useSharedState(notesStateSubject);
   return (
     <React.Fragment>
-      {notes.map(note => (
-        <NoteItem note={note} />
-      ))}
+      {notes.map((note: EditableNote) =>
+        note.isEditing ? <NoteEditor note={note} /> : <NoteItem note={note} />
+      )}
     </React.Fragment>
   );
 };

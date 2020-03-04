@@ -12,7 +12,7 @@ import { DialogService } from "./DialogService";
 import { TreeService } from "./TreeService";
 import { ItemService, EditableItem } from "./ItemService";
 import { generateUniqueId } from "../utils";
-import { NoteService, Note } from "./NoteService";
+import { NoteService, Note, EditableNote } from "./NoteService";
 
 const subscribe = <T extends keyof IActionParam>(
   subject: BehaviorSubject<Entry<keyof IActionParam>>,
@@ -23,14 +23,38 @@ const subscribe = <T extends keyof IActionParam>(
 };
 
 export const Subscriptions = {
+  onRemoveLabel: (subject: TActionSubject) => {
+    subscribe(subject, EAction.RemoveLabel, ([_, { note, label }]) => {
+      const noteService = NoteService.getService();
+      note.labels = note.labels.filter(l => l.id !== label.id);
+      noteService.updateNotes();
+    });
+  },
+  onEditNote: (subject: TActionSubject) => {
+    subscribe(subject, EAction.EditNote, ([_, { id }]) => {
+      const noteService = NoteService.getService();
+      noteService.getNote(id, (note: EditableNote) => {
+        note.isEditing = !note.isEditing;
+        noteService.selectedNoteStateSubject.next({
+          note: note.isEditing ? note : undefined // This is really ugly
+        });
+        noteService.updateNotes();
+      });
+    });
+  },
   onSelectItem: (subject: TActionSubject) => {
     subscribe(subject, EAction.SelectItem, ([_, { id }]) => {
       const noteService = NoteService.getService();
       const itemService = ItemService.getService();
       itemService.select(id);
+      // Mote to a separate function
       const selectedIds = itemService.selectedItemStateSubject.getValue();
       // TODO: Move this logic into showAllNotesForItems
       itemService.getItems(selectedIds, items => {
+        const { note } = noteService.selectedNoteStateSubject.getValue();
+        if (note) {
+          noteService.addLabel(note, items);
+        }
         noteService.showAllNotesForItems(items, () => {
           itemService.update();
           noteService.updateNotes();
@@ -44,7 +68,7 @@ export const Subscriptions = {
       const noteService = NoteService.getService();
       const selectedItems = itemService.selectedItemStateSubject.getValue();
       itemService.getItems(selectedItems, items => {
-        new Note(title, generateUniqueId(), html, items);
+        new EditableNote(title, generateUniqueId(), html, items);
         noteService.updateNotes();
       });
     });
@@ -79,8 +103,8 @@ export const Subscriptions = {
       const itemService = ItemService.getService();
       itemService.getItem(id, (item: EditableItem) => {
         item.isEditing = !item.isEditing;
+        itemService.update();
       });
-      itemService.update();
     });
   },
   onAddChild: (subject: TActionSubject) => {

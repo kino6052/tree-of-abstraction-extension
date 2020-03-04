@@ -3,6 +3,8 @@ import { Subscriptions } from "./Subscriptions";
 import { Tree } from "./TreeService";
 import { Id } from "../utils";
 import { ChangeEvent } from "react";
+import { IExtendedItem } from "./ItemService";
+import { INote } from "./NoteService";
 
 export enum EAction {
   CreateNewTree = "CreateNewTree",
@@ -19,7 +21,10 @@ export enum EAction {
   HierarchyInputChange = "HierarchyInputChange",
   ToggleCollapse = "ToggleCollapse",
   SelectItem = "SelectItem",
-  UpdateHierarchy = "UpdateHierarchy"
+  UpdateHierarchy = "UpdateHierarchy",
+  RemoveNote = "RemoveNote",
+  EditNote = "EditNote",
+  RemoveLabel = "RemoveLabel"
 }
 
 export type TActionSubject = BehaviorSubject<Entry<keyof IActionParam>>;
@@ -37,6 +42,9 @@ export interface IActionParam {
   [EAction.AddNote]: { title: string; html: string };
   [EAction.ToggleCollapse]: { id: Id };
   [EAction.SelectItem]: { id: Id };
+  [EAction.RemoveNote]: { id: Id };
+  [EAction.EditNote]: { id: Id };
+  [EAction.RemoveLabel]: { note: INote; label: IExtendedItem };
   [EAction.OpenDialog]: {
     content: React.ReactNode;
   };

@@ -6,7 +6,7 @@ import {
   EPersistenceMessage
 } from "../utils";
 import { EditableItem, IItem, ItemService } from "./ItemService";
-import { INote, NoteService, Note } from "./NoteService";
+import { INote, NoteService, Note, EditableNote } from "./NoteService";
 import { skip, filter, skipWhile, debounce } from "rxjs/operators";
 import { HistoryService } from "./HistoryService";
 
@@ -75,13 +75,17 @@ export class TreeService {
   generateTree = (tree: Tree) => {
     // Required to Properly Initialize Logic
     // For Both Notes and Items
-    tree.notes.map(({ title, id, html, labels }) => {
-      new Note(title, id, html, labels);
-    });
+    const itemService = ItemService.getService();
     const hierarchy = tree.hierarchy.map(
       ({ id, parentId, title, isCollapsed, visible }: EditableItem) =>
         new EditableItem(title, id, parentId, visible, isCollapsed)
     );
+    tree.notes.map(({ title, id, html, labels }) => {
+      const labelIds = labels.map(l => l.id);
+      itemService.getItems(labelIds, newLabels => {
+        new EditableNote(title, id, html, newLabels);
+      });
+    });
     return hierarchy[0];
   };
 

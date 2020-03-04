@@ -12,18 +12,7 @@ import {
 } from "@material-ui/core";
 import * as React from "react";
 import { ActionService, EAction } from "../services/ActionService";
-
-const unboxEvent = (
-  e: React.ChangeEvent | React.KeyboardEvent | React.MouseEvent
-): string => {
-  const {
-    target: {
-      // @ts-ignore
-      value = ""
-    } = {}
-  } = e || {};
-  return value;
-};
+import { unboxEvent } from "../utils";
 
 export const CreateNewTreeDialog: React.SFC = () => {
   const [title, setTitle] = React.useState("");

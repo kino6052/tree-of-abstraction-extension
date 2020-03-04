@@ -16,7 +16,12 @@ import ShareIcon from "@material-ui/icons/Share";
 import clsx from "clsx";
 import * as React from "react";
 import styled from "styled-components";
-import { INote } from "../services/NoteService";
+import { INote, NoteService } from "../services/NoteService";
+import { MenuComponent } from "./Menu";
+import { ActionService, EAction } from "../services/ActionService";
+import { FormControl, TextField } from "@material-ui/core";
+import Close from "@material-ui/icons/Close";
+import { unboxEvent } from "../utils";
 
 export const NoteItemWrapper = styled.div``;
 
@@ -48,11 +53,77 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+export const NoteEditor: React.SFC<{ note: INote }> = ({ note }) => {
+  const { id, title, html, labels, visible } = note;
+  const actionService = ActionService.getService();
+  const noteService = NoteService.getService();
+  return (
+    <div>
+      <Card key={id}>
+        <CardHeader
+          action={
+            <IconButton
+              aria-label="settings"
+              onClick={() => {
+                actionService.next(EAction.EditNote, { id });
+              }}
+            >
+              <Close />
+            </IconButton>
+          }
+        />
+        <FormControl fullWidth>
+          <TextField
+            label="Title"
+            defaultValue={title}
+            margin="normal"
+            variant="outlined"
+            value={title}
+            onChange={e => {
+              const title = unboxEvent(e);
+              note.title = title;
+              noteService.updateNotes();
+            }}
+          />
+        </FormControl>
+        {labels.map(label => (
+          <Chip
+            size="small"
+            deleteIcon={<Close />}
+            label={label.title}
+            icon={<ShareIcon />}
+            onDelete={() => {
+              actionService.next(EAction.RemoveLabel, { note, label });
+            }}
+            color="primary"
+          />
+        ))}
+        <FormControl fullWidth>
+          <TextField
+            label="HTML"
+            multiline
+            rows="4"
+            defaultValue={html}
+            margin="normal"
+            variant="outlined"
+            value={html}
+            onChange={e => {
+              const html = unboxEvent(e);
+              note.html = html;
+              noteService.updateNotes();
+            }}
+          />
+        </FormControl>
+      </Card>
+    </div>
+  );
+};
+
 export const NoteItem: React.SFC<{ note: INote }> = ({ note }) => {
   const { id, title, html, labels, visible } = note;
-  console.warn(labels);
   const classes = useStyles();
   const [expanded, setExpanded] = React.useState(false);
+  const actionService = ActionService.getService();
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
@@ -68,11 +139,26 @@ export const NoteItem: React.SFC<{ note: INote }> = ({ note }) => {
           }
           action={
             <IconButton aria-label="settings">
-              <MoreVertIcon />
+              <MenuComponent
+                options={[
+                  {
+                    text: "Edit",
+                    onClick: () => {
+                      actionService.next(EAction.EditNote, { id });
+                    }
+                  },
+                  {
+                    text: "Remove",
+                    onClick: () => {
+                      actionService.next(EAction.RemoveNote, { id });
+                    }
+                  }
+                ]}
+              />
             </IconButton>
           }
           title={title}
-          subheader={title}
+          // subheader={title}
         />
         <CardActions disableSpacing>
           {labels.map(l => (

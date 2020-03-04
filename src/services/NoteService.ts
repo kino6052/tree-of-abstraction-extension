@@ -89,8 +89,8 @@ export class NoteService {
       }
     );
 
-  addLabel = (note: INote, label: IExtendedItem) => {
-    note.labels = [...note.labels, label].filter(
+  addLabel = (note: INote, labels: IExtendedItem[]) => {
+    note.labels = [...note.labels, ...labels].filter(
       (l, i, s) => s.indexOf(l) === i
     );
   };
@@ -158,5 +158,13 @@ export class Note implements INote {
         if (!id) this.done = true; // Remove All
         this.labels = this.labels.filter(l => l.id !== id);
       });
+  }
+}
+
+export class EditableNote extends Note {
+  isEditing: boolean = false;
+  isCollapsed: boolean = true;
+  constructor(title: string, id: Id, html?: string, labels?: IExtendedItem[]) {
+    super(title, id, html, labels);
   }
 }

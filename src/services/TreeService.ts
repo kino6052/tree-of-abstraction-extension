@@ -75,8 +75,8 @@ export class TreeService {
   generateTree = (tree: Tree) => {
     // Required to Properly Initialize Logic
     // For Both Notes and Items
-    tree.notes.map(({ title, id, html }) => {
-      new Note(title, id, html);
+    tree.notes.map(({ title, id, html, labels }) => {
+      new Note(title, id, html, labels);
     });
     const hierarchy = tree.hierarchy.map(
       ({ id, parentId, title, isCollapsed, visible }: EditableItem) =>

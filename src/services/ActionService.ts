@@ -17,7 +17,9 @@ export enum EAction {
   AddChild = "AddChild",
   AddNote = "AddNote",
   HierarchyInputChange = "HierarchyInputChange",
-  ToggleCollapse = "ToggleCollapse"
+  ToggleCollapse = "ToggleCollapse",
+  SelectItem = "SelectItem",
+  UpdateHierarchy = "UpdateHierarchy"
 }
 
 export type TActionSubject = BehaviorSubject<Entry<keyof IActionParam>>;
@@ -26,9 +28,6 @@ export interface IActionParam {
   [EAction.CreateNewTree]: { title: string };
   [EAction.CloseDialog]: {};
   [EAction.SubmitDialog]: {};
-  [EAction.OpenDialog]: {
-    content: React.ReactNode;
-  };
   [EAction.ChangeLocation]: { location: string };
   [EAction.Nothing]: {};
   [EAction.GoToTree]: { tree: Tree };
@@ -36,13 +35,16 @@ export interface IActionParam {
   [EAction.EditItem]: { id: Id };
   [EAction.RemoveItem]: { id: Id };
   [EAction.AddNote]: { title: string; html: string };
+  [EAction.ToggleCollapse]: { id: Id };
+  [EAction.SelectItem]: { id: Id };
+  [EAction.OpenDialog]: {
+    content: React.ReactNode;
+  };
   [EAction.HierarchyInputChange]: {
     id: Id;
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>;
   };
-  [EAction.ToggleCollapse]: {
-    id: Id;
-  };
+  [EAction.UpdateHierarchy]: {};
 }
 
 export type Entry<T extends keyof IActionParam> = [T, IActionParam[T]];

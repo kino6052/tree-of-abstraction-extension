@@ -38,15 +38,6 @@ const DrawerWrapper = styled.div`
   }
   .toolbar {
     height: 56px;
-    display: flex;
-    align-items: center;
-    /* justify-content: space-between; */
-    padding: 0 24px;
-    width: 100%;
-    /* theme.mixins.toolbar, */
-    svg {
-      margin-right: 24px;
-    }
   }
   .content {
     flex-grow: 1;import Drawer from "@material-ui/core/Drawer";

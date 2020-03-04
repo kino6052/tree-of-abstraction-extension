@@ -1,5 +1,6 @@
 import Avatar from "@material-ui/core/Avatar";
 import Card from "@material-ui/core/Card";
+import Chip from "@material-ui/core/Chip";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import CardHeader from "@material-ui/core/CardHeader";
@@ -48,7 +49,8 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export const NoteItem: React.SFC<{ note: INote }> = ({ note }) => {
-  const { id, title, html } = note;
+  const { id, title, html, labels, visible } = note;
+  console.warn(labels);
   const classes = useStyles();
   const [expanded, setExpanded] = React.useState(false);
   const handleExpandClick = () => {
@@ -56,46 +58,51 @@ export const NoteItem: React.SFC<{ note: INote }> = ({ note }) => {
   };
 
   return (
-    <Card className={classes.root} key={id}>
-      <CardHeader
-        avatar={
-          <Avatar aria-label="recipe" className={classes.avatar}>
-            R
-          </Avatar>
-        }
-        action={
-          <IconButton aria-label="settings">
-            <MoreVertIcon />
+    <div style={{ display: visible ? "flex" : "none" }}>
+      <Card className={classes.root} key={id}>
+        <CardHeader
+          avatar={
+            <Avatar aria-label="recipe" className={classes.avatar}>
+              R
+            </Avatar>
+          }
+          action={
+            <IconButton aria-label="settings">
+              <MoreVertIcon />
+            </IconButton>
+          }
+          title={title}
+          subheader={title}
+        />
+        <CardActions disableSpacing>
+          {labels.map(l => (
+            <Chip
+              size="small"
+              label={l.title}
+              icon={<ShareIcon />}
+              // onDelete={handleDelete}
+              color="primary"
+            />
+          ))}
+          <IconButton
+            className={clsx(classes.expand, {
+              [classes.expandOpen]: expanded
+            })}
+            onClick={handleExpandClick}
+            aria-expanded={expanded}
+            aria-label="show more"
+          >
+            <ExpandMoreIcon />
           </IconButton>
-        }
-        title={title}
-        subheader={title}
-      />
-      <CardActions disableSpacing>
-        <IconButton aria-label="add to favorites">
-          <FavoriteIcon />
-        </IconButton>
-        <IconButton aria-label="share">
-          <ShareIcon />
-        </IconButton>
-        <IconButton
-          className={clsx(classes.expand, {
-            [classes.expandOpen]: expanded
-          })}
-          onClick={handleExpandClick}
-          aria-expanded={expanded}
-          aria-label="show more"
-        >
-          <ExpandMoreIcon />
-        </IconButton>
-      </CardActions>
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <CardContent>
-          <Typography>
-            <div dangerouslySetInnerHTML={{ __html: html }}></div>
-          </Typography>
-        </CardContent>
-      </Collapse>
-    </Card>
+        </CardActions>
+        <Collapse in={expanded} timeout="auto" unmountOnExit>
+          <CardContent>
+            <Typography>
+              <div dangerouslySetInnerHTML={{ __html: html }}></div>
+            </Typography>
+          </CardContent>
+        </Collapse>
+      </Card>
+    </div>
   );
 };

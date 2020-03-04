@@ -45,6 +45,11 @@ export class ItemService {
     this.removeSubject.next({});
   };
 
+  update = () => {
+    const root = this.getRoot();
+    if (root) this.updateHierarchy(root);
+  };
+
   getItemObjectsFromHierarchy = (hierarchy: HierarchyType[]): IItem[] =>
     hierarchy.map(([i]) => {
       const {
@@ -200,6 +205,26 @@ export class ItemService {
       }
     }
     cb();
+  };
+
+  getAllChildren = (
+    items: IExtendedItem[],
+    cb: (items: IExtendedItem[]) => void
+  ) => {
+    const result = [];
+    const stack: IExtendedItem[] = [...items];
+    while (stack.length > 0) {
+      const cur = stack.pop()!;
+      result.push(cur);
+      this.getChildren(
+        cur,
+        () => {},
+        (c: IExtendedItem) => {
+          stack.push(c);
+        }
+      );
+    }
+    cb(result);
   };
 
   uncollapseChildren = (id: Id, cb: () => void) => {

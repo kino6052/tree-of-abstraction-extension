@@ -1,5 +1,11 @@
 import { BehaviorSubject } from "rxjs";
-import { Entry, EAction, IActionParam, TActionSubject } from "./ActionService";
+import {
+  Entry,
+  EAction,
+  IActionParam,
+  TActionSubject,
+  ActionService
+} from "./ActionService";
 import { filter } from "rxjs/internal/operators/filter";
 import { HistoryService, EPath } from "./HistoryService";
 import { DialogService } from "./DialogService";
@@ -17,21 +23,36 @@ const subscribe = <T extends keyof IActionParam>(
 };
 
 export const Subscriptions = {
+  onSelectItem: (subject: TActionSubject) => {
+    subscribe(subject, EAction.SelectItem, ([_, { id }]) => {
+      const noteService = NoteService.getService();
+      const itemService = ItemService.getService();
+      itemService.select(id);
+      const selectedIds = itemService.selectedItemStateSubject.getValue();
+      // TODO: Move this logic into showAllNotesForItems
+      itemService.getItems(selectedIds, items => {
+        noteService.showAllNotesForItems(items, () => {
+          itemService.update();
+          noteService.updateNotes();
+        });
+      });
+    });
+  },
   onAddNote: (subject: TActionSubject) => {
     subscribe(subject, EAction.AddNote, ([_, { title, html }]) => {
+      const itemService = ItemService.getService();
       const noteService = NoteService.getService();
-      new Note(title, generateUniqueId(), html);
-      noteService.updateNotes();
+      const selectedItems = itemService.selectedItemStateSubject.getValue();
+      itemService.getItems(selectedItems, items => {
+        new Note(title, generateUniqueId(), html, items);
+        noteService.updateNotes();
+      });
     });
   },
   onToggleCollapse: (subject: TActionSubject) => {
     subscribe(subject, EAction.ToggleCollapse, ([_, { id }]) => {
       const itemService = ItemService.getService();
-      const update = () => {
-        // Update Hierarchy (Think of a more elegant way)
-        const root = itemService.getRoot();
-        if (root) itemService.updateHierarchy(root);
-      };
+      const update = itemService.update;
       itemService.getItem(id, (item: EditableItem) => {
         item.isCollapsed = !item.isCollapsed;
         if (item.isCollapsed) {
@@ -50,9 +71,7 @@ export const Subscriptions = {
       itemService.getItem(id, item => {
         item.title = value;
       });
-      // Update Hierarchy (Think of a more elegant way)
-      const root = itemService.getRoot();
-      if (root) itemService.updateHierarchy(root);
+      itemService.update();
     });
   },
   onEditItem: (subject: TActionSubject) => {
@@ -61,9 +80,7 @@ export const Subscriptions = {
       itemService.getItem(id, (item: EditableItem) => {
         item.isEditing = !item.isEditing;
       });
-      // Update Hierarchy (Think of a more elegant way)
-      const root = itemService.getRoot();
-      if (root) itemService.updateHierarchy(root);
+      itemService.update();
     });
   },
   onAddChild: (subject: TActionSubject) => {
@@ -71,9 +88,7 @@ export const Subscriptions = {
       new EditableItem("Untitled", generateUniqueId(), id);
       const itemService = ItemService.getService();
       itemService.uncollapseChildren(id, () => {
-        // Update Hierarchy (Think of a more elegant way)
-        const root = itemService.getRoot();
-        if (root) itemService.updateHierarchy(root);
+        itemService.update();
       });
     });
   },

@@ -12,15 +12,23 @@ import {
 } from "@material-ui/core";
 import { MenuComponent } from "./Menu";
 import { ActionService, EAction } from "../services/ActionService";
-import { IExtendedItem, EditableItem } from "../services/ItemService";
+import {
+  IExtendedItem,
+  EditableItem,
+  ItemService
+} from "../services/ItemService";
 
 const HierarchyItemWrapper = styled.div<{
   visible: boolean;
   indentation: number;
+  selected?: boolean;
 }>`
   margin-left: ${({ indentation }) => indentation * 16}px;
   display: ${({ visible }) => (visible ? "flex" : "none")};
   flex-direction: row;
+  .root {
+    background: ${({ selected }) => (selected ? "rgba(0,0,0,0.2)" : "none")};
+  }
   .icon {
     margin-right: 8px;
     padding: 0;
@@ -43,49 +51,14 @@ export const MainMenuHierarchyItem: React.SFC<{
     onChange,
     ...rest
   } = props;
-  const actionService = ActionService.getService();
   return (
     <HierarchyItemWrapper {...rest} visible={true} indentation={indentation}>
       <ListItem>
         <ListItemIcon className="icon">
-          <React.Fragment>
-            {collapsed && <ExpandMore />}
-            {!collapsed && <Remove />}
-          </React.Fragment>
-        </ListItemIcon>
-        <ListItemIcon className="icon">
           <Book />
         </ListItemIcon>
-        {!isEditing && (
-          <ListItemText
-            primary={title}
-            // secondary={secondary ? "Secondary text" : null}
-          />
-        )}
-        {isEditing && (
-          <Input
-            value={title}
-            onChange={onChange}
-            // secondary={secondary ? "Secondary text" : null}
-          />
-        )}
+        <ListItemText primary={title} />
       </ListItem>
-      {/* <MenuComponent
-        options={[
-          {
-            text: "Edit",
-            onClick: () => actionService.next(EAction.EditItem, { id })
-          },
-          {
-            text: "Add Child",
-            onClick: () => actionService.next(EAction.AddChild, { id })
-          },
-          {
-            text: "Remove",
-            onClick: () => actionService.next(EAction.RemoveItem, { id })
-          }
-        ]}
-      /> */}
     </HierarchyItemWrapper>
   );
 };
@@ -100,9 +73,23 @@ export const HierarchyItem: React.SFC<{
     ...rest
   } = props;
   const actionService = ActionService.getService();
+  const itemService = ItemService.getService();
+  const selectedItems = itemService.selectedItemStateSubject.getValue();
+  // @ts-ignore
+  const isSelected = selectedItems.includes(id);
   return (
-    <HierarchyItemWrapper {...rest} visible={visible} indentation={indentation}>
-      <ListItem>
+    <HierarchyItemWrapper
+      {...rest}
+      selected={isSelected}
+      visible={visible}
+      indentation={indentation}
+    >
+      <ListItem
+        classes={{ root: "root" }}
+        onClick={() => {
+          actionService.next(EAction.SelectItem, { id });
+        }}
+      >
         <ListItemIcon className="icon">
           <div
             onClick={() => actionService.next(EAction.ToggleCollapse, { id })}

@@ -15,11 +15,21 @@ import { useSharedState } from "../utils";
 import { TreeService } from "../services/TreeService";
 import IconButton from "@material-ui/core/IconButton";
 import { MenuComponent } from "./Menu";
+import styled from "styled-components";
+
+export const MenuWrapper = styled.div`
+  .toolbar {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 24px;
+  }
+`;
 
 export const MainMenu: React.SFC = () => {
-  const actionService = ActionService.getService();
   return (
-    <React.Fragment>
+    <MenuWrapper>
       <div className={"toolbar"}>
         {/* <ArrowBack /> */}
         <Typography>Toolset</Typography>
@@ -28,7 +38,7 @@ export const MainMenu: React.SFC = () => {
       <HierarchyList>
         <MainMenuHierarchyItem title={"Trees"} />
       </HierarchyList>
-    </React.Fragment>
+    </MenuWrapper>
   );
 };
 
@@ -41,7 +51,7 @@ export const TreeMenu: React.SFC = () => {
     downloadTree
   } = TreeService.getService();
   return (
-    <React.Fragment>
+    <MenuWrapper>
       <div className={"toolbar"}>
         <IconButton>
           <ArrowBack
@@ -68,6 +78,6 @@ export const TreeMenu: React.SFC = () => {
           />
         ))}
       </HierarchyList>
-    </React.Fragment>
+    </MenuWrapper>
   );
 };

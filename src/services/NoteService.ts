@@ -58,6 +58,26 @@ export class NoteService {
     return false;
   };
 
+  showAllNotesForItems = (items: IExtendedItem[], cb: () => void) => {
+    const itemService = ItemService.getService();
+    const noteService = NoteService.getService();
+    const { id: rootId } = itemService.getRoot() || {};
+    itemService.getAllChildren(items, items => {
+      noteService.getAllNotes(cb, note => {
+        const itemIds = items.map(i => i.id);
+        note.visible = false;
+        // Has a selected label
+        note.labels.forEach(l => {
+          // @ts-ignore
+          if (itemIds.includes(l.id)) note.visible = true;
+        });
+        // Root is selected -> Show all notes
+        // @ts-ignore
+        if (itemIds.includes(rootId)) note.visible = true;
+      });
+    });
+  };
+
   updateNotes = () =>
     this.getAllNotes(
       notes => {
@@ -65,7 +85,7 @@ export class NoteService {
       },
       note => {
         const query = this.noteSearchStateSubject.getValue();
-        note.visible = this.noteSearch(note, query);
+        // note.visible = this.noteSearch(note, query);
       }
     );
 
@@ -107,10 +127,11 @@ export class Note implements INote {
   done: boolean = false;
   meta: {} = {};
   visible: boolean = true;
-  constructor(title: string, id: Id, html = "") {
+  constructor(title: string, id: Id, html = "", labels: IExtendedItem[] = []) {
     this.id = id;
     this.title = title;
     this.html = html;
+    this.labels = labels;
     const noteService = NoteService.getService();
     const itemService = ItemService.getService();
     // Respond to getNodeById Requests

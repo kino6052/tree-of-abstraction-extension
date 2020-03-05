@@ -41,6 +41,34 @@ export class ItemService {
     return ItemService.itemService;
   };
 
+  changeSelectedItemToNewParent = (id: Id, cb: () => void) => {
+    const current = this.selectedItemStateSubject.getValue()[0];
+    if (current) {
+      this.getItems([id, current], items => {
+        const newParent = items[0];
+        const item = items[1];
+        if (item.parentId) {
+          this.getItem(item.parentId!, oldParent => {
+            oldParent.children = oldParent.children.filter(c => c !== item.id);
+            item.parentId = newParent.id;
+            newParent.children = [
+              ...newParent.children.filter(c => c !== item.id),
+              item.id
+            ];
+            cb();
+          });
+        } else {
+          item.parentId = newParent.id;
+          newParent.children = [
+            ...newParent.children.filter(c => c !== item.id),
+            item.id
+          ];
+          cb();
+        }
+      });
+    }
+  };
+
   reset = () => {
     this.removeSubject.next({});
   };

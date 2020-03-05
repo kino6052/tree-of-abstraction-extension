@@ -89,8 +89,13 @@ export const HierarchyItem: React.SFC<{
     >
       <ListItem
         classes={{ root: "root" }}
-        onClick={() => {
-          actionService.next(EAction.SelectItem, { id });
+        onClick={e => {
+          const ctrlKey = e.ctrlKey;
+          if (ctrlKey) {
+            actionService.next(EAction.ChangeParent, { id });
+          } else {
+            actionService.next(EAction.SelectItem, { id });
+          }
         }}
       >
         <ListItemIcon className="icon">

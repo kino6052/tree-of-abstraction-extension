@@ -23,6 +23,14 @@ const subscribe = <T extends keyof IActionParam>(
 };
 
 export const Subscriptions = {
+  onChangeParent: (subject: TActionSubject) => {
+    subscribe(subject, EAction.ChangeParent, ([_, { id }]) => {
+      const itemService = ItemService.getService();
+      itemService.changeSelectedItemToNewParent(id, () => {
+        itemService.update();
+      });
+    });
+  },
   onRemoveItem: (subject: TActionSubject) => {
     subscribe(subject, EAction.RemoveItem, ([_, { id }]) => {
       const itemService = ItemService.getService();

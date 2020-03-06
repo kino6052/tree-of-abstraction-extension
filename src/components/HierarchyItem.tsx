@@ -29,6 +29,7 @@ const HierarchyItemWrapper = styled.div<{
   flex-direction: row;
   .root {
     background: ${({ selected }) => (selected ? "rgba(0,0,0,0.2)" : "none")};
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   }
   .icon {
     margin-right: 8px;

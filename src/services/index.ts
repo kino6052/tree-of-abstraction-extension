@@ -1,9 +1,25 @@
 import { HistoryService } from "./HistoryService";
 import { TreeService, Tree } from "./TreeService";
 import { onUpload, generateUniqueId } from "../utils";
+import { DatabaseService } from "./StorageService";
 
 export const init = () => {
-  // TreeService.getService().next([{ title: "One" }, { title: "Two" }]);
+  // const db = DatabaseService.getService();
+  // db.addOrUpdateTree(
+  //   {
+  //     id: generateUniqueId(),
+  //     title: "Test",
+  //     hierarchy: [],
+  //     notes: []
+  //   },
+  //   () => {
+  //     db.getAll(trees => {
+  //       trees.forEach(t => {
+  //         db.removeTree(t.id, console.warn);
+  //       });
+  //     });
+  //   }
+  // );
 };
 
 export const callback = () => {

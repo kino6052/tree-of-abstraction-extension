@@ -51,6 +51,15 @@ export class NoteService {
     this.noteSubject.next({ id, cb });
   };
 
+  getNoteObjects = (notes: INote[]) => {
+    const itemService = ItemService.getService();
+    return notes.map(n => {
+      n.labels = itemService.getItemObjectsFromList(n.labels);
+      const { labels, title, id, html, visible } = n;
+      return { labels, title, id, html, visible };
+    });
+  };
+
   noteSearch = (note: INote, query: string) => {
     const noteTitle = note.title.toLocaleLowerCase();
     const q = query.toLocaleLowerCase();
@@ -90,7 +99,10 @@ export class NoteService {
     );
 
   addLabel = (note: INote, labels: IExtendedItem[]) => {
-    note.labels = [...note.labels, ...labels].filter(
+    const itemService = ItemService.getService();
+    const oldLabels = itemService.getItemObjectsFromList(note.labels);
+    const newLabels = itemService.getItemObjectsFromList(labels);
+    note.labels = [...oldLabels, ...newLabels].filter(
       (l, i, s) => s.indexOf(l) === i
     );
   };

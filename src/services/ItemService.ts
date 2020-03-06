@@ -91,6 +91,27 @@ export class ItemService {
       return { id, title, children, parentId, isCollapsed, visible };
     });
 
+  getItemObjectsFromList = (hierarchy: IExtendedItem[]): IExtendedItem[] =>
+    hierarchy.map(i => {
+      const {
+        id,
+        title,
+        children,
+        parentId,
+        isCollapsed,
+        visible
+      } = i as EditableItem;
+      return {
+        id,
+        title,
+        children,
+        parentId,
+        isCollapsed,
+        visible,
+        done: false
+      };
+    });
+
   getItem = (id: Id, cb: (item: IExtendedItem) => void) => {
     this.itemSubject.next({ id, cb });
   };

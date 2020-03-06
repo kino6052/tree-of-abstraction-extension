@@ -9,6 +9,7 @@ import { EditableItem, IItem, ItemService } from "./ItemService";
 import { INote, NoteService, Note, EditableNote } from "./NoteService";
 import { skip, filter, skipWhile, debounce } from "rxjs/operators";
 import { HistoryService } from "./HistoryService";
+import { DatabaseService } from "./StorageService";
 
 export interface Tree {
   title: string;
@@ -52,7 +53,8 @@ export class TreeService {
         const [tree] = this.getTreeById(id);
         if (!tree) return;
         tree.hierarchy = itemService.getItemObjectsFromHierarchy(hierarchy);
-        tree.notes = notes;
+        //@ts-ignore
+        tree.notes = noteService.getNoteObjects(notes);
         this.saveTree(tree);
       });
 
@@ -68,7 +70,7 @@ export class TreeService {
       });
 
     // Load Trees from Sync Storage
-    this.onLoadTrees();
+    // this.onLoadTrees();
     this.loadTrees();
   }
 
@@ -97,7 +99,7 @@ export class TreeService {
       encodeURIComponent(JSON.stringify(result));
     const dlAnchorElem = document.createElement("a");
     dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", "tree.json");
+    dlAnchorElem.setAttribute("download", `${result.title}.json`);
     dlAnchorElem.click();
   };
 
@@ -114,26 +116,32 @@ export class TreeService {
   };
 
   loadTrees = () => {
-    sendMessage(EPersistenceMessage.LoadTrees, {});
+    const dbService = DatabaseService.getService();
+    dbService.getAll(trees => {
+      this.treeSubject.next(trees);
+    });
   };
 
   onLoadTrees = () => {
-    document.addEventListener(
-      EPersistenceMessage.TreesLoaded,
-      (e: CustomEvent) => {
-        const { detail: { trees = [] as Tree[] } = {} } = e;
-        this.treeSubject.next(trees);
-      }
-    );
+    // document.addEventListener(
+    //   EPersistenceMessage.TreesLoaded,
+    //   (e: CustomEvent) => {
+    //     const { detail: { trees = [] as Tree[] } = {} } = e;
+    //     this.treeSubject.next(trees);
+    //   }
+    // );
   };
 
   saveTree = (tree: Tree) => {
-    sendMessage(EPersistenceMessage.SaveTree, { tree });
+    const dbService = DatabaseService.getService();
+    dbService.addOrUpdateTree(tree, console.warn);
   };
 
   saveTreeIds = (trees: Tree[]) => {
-    const treeIds = trees.map(t => t.id);
-    sendMessage(EPersistenceMessage.SaveTreeIds, { treeIds });
+    const dbService = DatabaseService.getService();
+    trees.forEach(tree => {
+      dbService.addOrUpdateTree(tree, console.warn);
+    });
   };
 
   next = (trees: Tree[]) => {

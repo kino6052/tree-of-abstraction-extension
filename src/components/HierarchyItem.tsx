@@ -25,7 +25,6 @@ const HierarchyItemWrapper = styled.div<{
   indentation: number;
   selected?: boolean;
 }>`
-  margin-left: ${({ indentation }) => indentation * 16}px;
   display: ${({ visible }) => (visible ? "flex" : "none")};
   flex-direction: row;
   .root {
@@ -65,10 +64,15 @@ export const MainMenuHierarchyItem: React.SFC<{
   );
 };
 
+const Vertical = styled.span`
+  padding-left: 22px;
+  border-left: 1px solid gray;
+`;
+
 export const HierarchyItem: React.SFC<{
   item: EditableItem;
   indentation?: number;
-}> = React.memo(props => {
+}> = props => {
   const { item } = props;
   const {
     item: { id, title, isCollapsed, isEditing, visible },
@@ -87,6 +91,9 @@ export const HierarchyItem: React.SFC<{
       visible={visible}
       indentation={indentation}
     >
+      {new Array(indentation).fill(0).map(() => (
+        <Vertical />
+      ))}
       <ListItem
         classes={{ root: "root" }}
         onClick={e => {
@@ -146,7 +153,7 @@ export const HierarchyItem: React.SFC<{
       />
     </HierarchyItemWrapper>
   );
-});
+};
 
 export const HierarchyList: React.SFC<{
   children: React.ReactNode;

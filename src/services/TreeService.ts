@@ -157,10 +157,8 @@ export class TreeService {
   };
 
   removeTree = (id: Id) => {
-    if (!id) return;
-    const old = this.treeSubject.getValue();
-    const newTrees = old.filter(t => t.id !== id);
-    this.treeSubject.next(newTrees);
+    const dbService = DatabaseService.getService();
+    dbService.removeTree(id, console.warn);
   };
 
   updateTrees = () => {

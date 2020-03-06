@@ -68,7 +68,7 @@ export const MainMenuHierarchyItem: React.SFC<{
 export const HierarchyItem: React.SFC<{
   item: EditableItem;
   indentation?: number;
-}> = props => {
+}> = React.memo(props => {
   const { item } = props;
   const {
     item: { id, title, isCollapsed, isEditing, visible },
@@ -146,7 +146,7 @@ export const HierarchyItem: React.SFC<{
       />
     </HierarchyItemWrapper>
   );
-};
+});
 
 export const HierarchyList: React.SFC<{
   children: React.ReactNode;

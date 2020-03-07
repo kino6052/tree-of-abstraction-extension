@@ -123,7 +123,7 @@ export const NoteEditor: React.SFC<{ note: INote }> = ({ note }) => {
 export const NoteItem: React.SFC<{ note: INote }> = ({ note }) => {
   const { id, title, html, labels, visible } = note;
   const classes = useStyles();
-  const [expanded, setExpanded] = React.useState(false);
+  const [expanded, setExpanded] = React.useState(true);
   const actionService = ActionService.getService();
   const handleExpandClick = () => {
     setExpanded(!expanded);

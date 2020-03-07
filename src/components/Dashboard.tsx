@@ -13,7 +13,7 @@ import { NoteItem, NoteEditor } from "./NoteItem";
 import { TreeItem } from "./TreeItem";
 import { NoteService, EditableNote } from "../services/NoteService";
 
-const drawerWidth = 400;
+const drawerWidth = 800;
 
 const DrawerWrapper = styled.div`
   .root {
